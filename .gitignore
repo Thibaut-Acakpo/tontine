@@ -1,0 +1,38 @@
+# Dependencies
+node_modules/
+*/node_modules/
+
+# Environment
+.env
+.env.*
+!.env.example
+*/.env
+*/.env.*
+!*/.env.example
+
+# Builds
+dist/
+*/dist/
+.vite/
+*/.vite/
+
+# Logs
+logs/
+*/logs/
+*.log
+npm-debug.log*
+
+# Storage
+storage/
+*/storage/
+backups/
+*/backups/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
