@@ -8,6 +8,7 @@ const { getAccess, requireRole } = require('../services/access');
 const { notifyUser } = require('../notify');
 const { audit } = require('../audit');
 const { sendMail } = require('../mailer');
+const { randomToken, sha256 } = require('../utils/crypto');
 
 const router = express.Router();
 
@@ -48,7 +49,7 @@ router.get('/search',
   })
 );
 
-// ✅ Ajout d'un membre AVEC email d'invitation automatique
+// ✅ Ajout d'un membre AVEC email d'invitation sécurisé par token
 router.post('/', validate({ body: z.object({ tontineId: s.id, email: s.email, displayName: s.name }).strict() }), asyncHandler(async (req, res) => {
   const a = await getAccess(req, req.body.tontineId);
   requireRole(a, ['manager'], req);
@@ -58,14 +59,20 @@ router.post('/', validate({ body: z.object({ tontineId: s.id, email: s.email, di
   const user = await db.one("SELECT id, full_name FROM users WHERE email = ? AND status = 'active' AND email_verified_at IS NOT NULL", [email]);
 
   let inserted = false;
+  let memberId = null;
+
   await db.tx(async (conn) => {
     const pos = await db.one('SELECT COALESCE(MAX(position),0) + 1 AS p, COUNT(*) AS n FROM tontine_members WHERE tontine_id = ? FOR UPDATE', [a.tontine.id], conn);
     if (pos.n >= 50) throw E.conflict('Nombre maximum de membres atteint');
     const dup = await db.one('SELECT id FROM tontine_members WHERE tontine_id = ? AND (user_id = ? OR invited_email = ?)', [a.tontine.id, user?.id ?? 0, email], conn);
-    if (dup) return;
+    if (dup) {
+      memberId = dup.id;
+      return;
+    }
 
-    await db.query('INSERT INTO tontine_members (tontine_id, user_id, invited_email, display_name, position) VALUES (?,?,?,?,?)',
+    const r = await db.query('INSERT INTO tontine_members (tontine_id, user_id, invited_email, display_name, position) VALUES (?,?,?,?,?)',
       [a.tontine.id, user?.id ?? null, user ? null : email, displayName, pos.p], conn);
+    memberId = r.insertId;
     inserted = true;
   });
 
@@ -92,8 +99,18 @@ router.post('/', validate({ body: z.object({ tontineId: s.id, email: s.email, di
     }, { email: true });
     emailSent = true;
   } else {
-    // L'utilisateur n'a pas de compte → email d'invitation à créer un compte
+    // L'utilisateur n'a pas de compte → email d'invitation avec token unique
     try {
+      const rawToken = randomToken(32);
+      const tokenHash = sha256(rawToken);
+
+      // Stocker le token en base (usage unique, valide 7 jours)
+      await db.query(
+        `INSERT INTO email_tokens (invited_email, member_id, purpose, token_hash, expires_at)
+         VALUES (?, ?, 'invitation', ?, UTC_TIMESTAMP() + INTERVAL 7 DAY)`,
+        [email, memberId, tokenHash]
+      );
+
       await sendMail({
         to: email,
         subject: `Invitation à rejoindre la tontine « ${tontineName} »`,
@@ -107,10 +124,11 @@ ${inviterName} vous invite à rejoindre la tontine « ${tontineName} » sur Tont
    • Fréquence : ${freq}
    • Démarrage : ${new Date(a.tontine.start_date).toLocaleDateString('fr-FR')}
 
-👉 Pour consulter vos cotisations, payer en ligne et recevoir des rappels :
-   1. Créez votre compte sur ${appUrl}/connexion
-   2. Utilisez EXACTEMENT cette adresse email : ${email}
-   3. Vous serez automatiquement rattaché à la tontine.
+👉 Pour rejoindre cette tontine, cliquez sur ce lien personnel (valable 7 jours) :
+   ${appUrl}/inscription?token=${rawToken}
+
+⚠️ Ce lien est unique et personnel. Utilisez EXACTEMENT cette adresse email
+pour créer votre compte : ${email}
 
 Si vous ne souhaitez pas rejoindre cette tontine, ignorez cet email.
 
@@ -186,6 +204,8 @@ router.delete('/:id',
       throw E.conflict('Impossible de retirer un membre d\'une tontine active. Archivez la tontine d\'abord.');
     }
 
+    // Nettoyer les tokens d'invitation liés
+    await db.query("DELETE FROM email_tokens WHERE member_id = ? AND purpose = 'invitation' AND used_at IS NULL", [m.id]);
     await db.query('DELETE FROM tontine_members WHERE id = ?', [m.id]);
     await audit(req, { action: 'member.remove', resourceType: 'tontine_member', resourceId: m.id, meta: { tontineId: t.id } });
     ok(res, { message: 'Membre retiré' });

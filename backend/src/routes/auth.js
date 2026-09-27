@@ -35,7 +35,7 @@ const publicUser = (u) => ({
   emailVerified: !!(u.email_verified_at ?? u.emailVerified),
   hasPin: !!u.pin_hash,
   emailNotifications: !!(u.email_notifications ?? u.emailNotifications),
-  has2FA: !!u.totp_enabled,  // ✅ AJOUT
+  has2FA: !!u.totp_enabled,
 });
 
 async function issueEmailToken(user, purpose, ttlMinutes) {
@@ -83,11 +83,13 @@ function generateBackupCodes() {
   return codes;
 }
 
-// Les codes de secours sont hashés en SHA-256 avant stockage (comme les tokens email)
 function hashBackupCodes(codes) {
   return codes.map((c) => sha256(c.toUpperCase()));
 }
 
+// ============================================================
+// INSCRIPTION PUBLIQUE (désactivée mais conservée)
+// ============================================================
 router.post('/register', limiters.register, validate({ body: z.object({ email: s.email, password: s.password, fullName: s.name, phone: s.phone.optional() }).strict() }),
   asyncHandler(async (req, res) => {
     const { email, password, fullName, phone } = req.body;
@@ -105,6 +107,83 @@ router.post('/register', limiters.register, validate({ body: z.object({ email: s
     ok(res, { message: GENERIC }, undefined, 202);
   }));
 
+// ============================================================
+// ✅ NOUVEAU : INSCRIPTION PAR INVITATION (token requis)
+// ============================================================
+router.post('/register-invited',
+  limiters.register,
+  validate({
+    body: z.object({
+      token: z.string().min(20).max(100),
+      email: s.email,
+      fullName: s.name,
+      password: s.password,
+      phone: s.phone.optional(),
+    }).strict()
+  }),
+  asyncHandler(async (req, res) => {
+    const { token, email, fullName, password, phone } = req.body;
+
+    // 1. Vérifier le token d'invitation
+    const tokenRow = await db.one(
+      `SELECT id, invited_email, member_id
+         FROM email_tokens
+        WHERE token_hash = ? AND purpose = 'invitation' AND used_at IS NULL AND expires_at > UTC_TIMESTAMP()`,
+      [sha256(token)]
+    );
+
+    if (!tokenRow) {
+      throw E.badRequest('Lien d\'invitation invalide ou expiré');
+    }
+
+    // 2. Vérifier que l'email correspond à celui de l'invitation
+    if (tokenRow.invited_email && tokenRow.invited_email.toLowerCase() !== email.toLowerCase()) {
+      throw E.badRequest('Vous devez utiliser l\'adresse email qui a reçu l\'invitation : ' + tokenRow.invited_email);
+    }
+
+    // 3. Vérifier que l'email n'a pas déjà un compte
+    const existing = await db.one('SELECT id FROM users WHERE email = ?', [email]);
+    if (existing) {
+      throw E.conflict('Un compte existe déjà avec cet email. Connectez-vous.');
+    }
+
+    // 4. Créer le compte (email déjà vérifié car invitation valide)
+    const hash = await argon2.hash(password, ARGON);
+    const r = await db.query(
+      `INSERT INTO users (email, password_hash, full_name, phone, status, email_verified_at)
+       VALUES (?, ?, ?, ?, 'active', UTC_TIMESTAMP())`,
+      [email, hash, fullName, phone || null]
+    );
+
+    // 5. Rattacher automatiquement le nouveau compte à la tontine
+    if (tokenRow.member_id) {
+      await db.query(
+        'UPDATE tontine_members SET user_id = ?, invited_email = NULL WHERE id = ?',
+        [r.insertId, tokenRow.member_id]
+      );
+    } else if (tokenRow.invited_email) {
+      await db.query(
+        'UPDATE tontine_members SET user_id = ?, invited_email = NULL WHERE invited_email = ? AND user_id IS NULL',
+        [r.insertId, email]
+      );
+    }
+
+    // 6. Marquer le token comme utilisé
+    await db.query('UPDATE email_tokens SET used_at = UTC_TIMESTAMP() WHERE id = ?', [tokenRow.id]);
+
+    await audit(req, {
+      action: 'auth.register_invited',
+      resourceType: 'user',
+      resourceId: r.insertId,
+      meta: { email, invited: true },
+    });
+
+    ok(res, { message: 'Compte créé. Vous pouvez vous connecter.' }, undefined, 201);
+  }));
+
+// ============================================================
+// VÉRIFICATION EMAIL
+// ============================================================
 router.post('/verify-email', limiters.sensitive, validate({ body: z.object({ token: s.token }).strict() }),
   asyncHandler(async (req, res) => {
     const row = await db.one(
@@ -129,6 +208,9 @@ router.post('/resend-verification', limiters.emailSend, validate({ body: z.objec
     ok(res, { message: GENERIC });
   }));
 
+// ============================================================
+// CONNEXION
+// ============================================================
 router.post('/login', limiters.login, validate({ body: z.object({ email: s.email, password: z.string().min(1).max(128) }).strict() }),
   asyncHandler(async (req, res) => {
     const { email, password } = req.body;
@@ -165,28 +247,20 @@ router.post('/login', limiters.login, validate({ body: z.object({ email: s.email
 
     await db.query('UPDATE users SET failed_logins = 0, locked_until = NULL WHERE id = ?', [u.id]);
 
-    // ✅ Vérifier si 2FA est activée
     if (u.totp_enabled) {
-      // On ne crée PAS encore de session. On renvoie un "challenge" que le frontend va résoudre.
-      // Pour simplifier, on crée une session "partielle" en attendant la vérification 2FA.
-      // Approche : on ne crée la session qu'après validation du code TOTP.
-      // On stocke temporairement le user_id dans un cookie de pré-auth signé.
       const preAuthToken = randomToken(32);
       await db.query(
         'INSERT INTO sessions (user_id, token_hash, csrf_token, ip, user_agent, expires_at) VALUES (?,?,?,?,?, UTC_TIMESTAMP() + INTERVAL 5 MINUTE)',
         [u.id, sha256(`preauth:${preAuthToken}`), 'preauth', ip, ua],
       );
-      // On utilise le même cookie mais on marque la session comme "pending 2FA"
-      // Le frontend redirige vers /2fa
       await audit(req, { action: 'auth.login_pending_2fa', resourceType: 'user', resourceId: u.id, userId: u.id });
       return ok(res, {
         requires2FA: true,
         preAuthToken,
-        user: { id: u.id, email: u.email, fullName: u.full_name }, // minimal
+        user: { id: u.id, email: u.email, fullName: u.full_name },
       });
     }
 
-    // ✅ Vérifier si PIN activé
     const csrfToken = await createSession(req, res, u.id);
     await db.query(
       'INSERT INTO login_history (user_id, ip, user_agent, result) VALUES (?,?,?,?)',
@@ -201,7 +275,9 @@ router.post('/login', limiters.login, validate({ body: z.object({ email: s.email
     });
   }));
 
-// ✅ NOUVEAU : Vérification du code 2FA (après login)
+// ============================================================
+// VÉRIFICATION 2FA
+// ============================================================
 router.post('/2fa/verify', limiters.sensitive, validate({
   body: z.object({
     preAuthToken: z.string().min(10).max(100),
@@ -210,7 +286,6 @@ router.post('/2fa/verify', limiters.sensitive, validate({
 }), asyncHandler(async (req, res) => {
   const { preAuthToken, code } = req.body;
 
-  // Retrouver la session de pré-auth
   const preSession = await db.one(
     `SELECT s.id AS session_id, s.user_id, u.email, u.totp_secret, u.totp_backup_codes, u.totp_failed_logins, u.totp_locked_until
        FROM sessions s JOIN users u ON u.id = s.user_id
@@ -220,7 +295,6 @@ router.post('/2fa/verify', limiters.sensitive, validate({
   );
   if (!preSession) throw E.badRequest('Session expirée. Reconnectez-vous.');
 
-  // Verrouillage
   const locked = preSession.totp_locked_until && new Date(preSession.totp_locked_until) > new Date();
   if (locked) {
     const remainingMs = new Date(preSession.totp_locked_until) - Date.now();
@@ -228,17 +302,14 @@ router.post('/2fa/verify', limiters.sensitive, validate({
     throw new AppError(423, 'TOTP_LOCKED', `2FA verrouillée. Réessayez dans ${min} minute${min > 1 ? 's' : ''}.`);
   }
 
-  // Vérifier le code TOTP
   const cleanCode = code.replace(/\s|-/g, '').toUpperCase();
   let isValid = false;
   let usedBackupCode = false;
 
-  // 1. Essayer TOTP (6 chiffres)
   if (/^\d{6}$/.test(cleanCode)) {
     isValid = authenticator.verify({ token: cleanCode, secret: preSession.totp_secret });
   }
 
-  // 2. Sinon essayer code de secours (format XXXX-XXXX)
   if (!isValid && preSession.totp_backup_codes) {
     const hashedCodes = JSON.parse(preSession.totp_backup_codes);
     const codeHash = sha256(cleanCode);
@@ -246,7 +317,6 @@ router.post('/2fa/verify', limiters.sensitive, validate({
     if (idx !== -1) {
       isValid = true;
       usedBackupCode = true;
-      // Retirer le code utilisé
       const remaining = hashedCodes.filter((_, i) => i !== idx);
       await db.query('UPDATE users SET totp_backup_codes = ? WHERE id = ?', [JSON.stringify(remaining), preSession.user_id]);
     }
@@ -265,7 +335,6 @@ router.post('/2fa/verify', limiters.sensitive, validate({
     throw new AppError(401, 'INVALID_2FA', `Code invalide. Il vous reste ${remaining} tentative${remaining > 1 ? 's' : ''}.`);
   }
 
-  // Code valide : on supprime la session de pré-auth et on en crée une vraie
   await db.query('UPDATE sessions SET revoked_at = UTC_TIMESTAMP() WHERE id = ?', [preSession.session_id]);
   await db.query('UPDATE users SET totp_failed_logins = 0, totp_locked_until = NULL WHERE id = ?', [preSession.user_id]);
 
@@ -288,7 +357,9 @@ router.post('/2fa/verify', limiters.sensitive, validate({
   });
 }));
 
-// ✅ NOUVEAU : Démarrer la configuration 2FA (génère le secret + QR code)
+// ============================================================
+// 2FA : SETUP
+// ============================================================
 router.post('/2fa/setup', requireAuth, asyncHandler(async (req, res) => {
   const u = await db.one('SELECT id, email, totp_enabled FROM users WHERE id = ?', [req.user.id]);
   if (u.totp_enabled) throw E.conflict('La 2FA est déjà activée');
@@ -297,14 +368,12 @@ router.post('/2fa/setup', requireAuth, asyncHandler(async (req, res) => {
   const otpauth = authenticator.keyuri(u.email, 'Tontine', secret);
   const qrCode = await QRCode.toDataURL(otpauth, { width: 240, margin: 1 });
 
-  // On stocke temporairement le secret (pas encore activé)
   await db.query('UPDATE users SET totp_secret = ? WHERE id = ?', [secret, u.id]);
   await audit(req, { action: 'auth.2fa_setup_start', resourceType: 'user', resourceId: u.id });
 
   ok(res, { secret, qrCode, otpauth });
 }));
 
-// ✅ NOUVEAU : Confirmer l'activation 2FA avec un premier code
 router.post('/2fa/enable', requireAuth, limiters.sensitive, validate({
   body: z.object({ code: z.string().regex(/^\d{6}$/, 'Code à 6 chiffres requis') }).strict()
 }), asyncHandler(async (req, res) => {
@@ -318,7 +387,6 @@ router.post('/2fa/enable', requireAuth, limiters.sensitive, validate({
     throw E.badRequest('Code invalide. Vérifiez que l\'heure de votre téléphone est correcte.');
   }
 
-  // Générer les codes de secours
   const backupCodes = generateBackupCodes();
   const hashedBackupCodes = hashBackupCodes(backupCodes);
 
@@ -331,7 +399,6 @@ router.post('/2fa/enable', requireAuth, limiters.sensitive, validate({
   ok(res, { backupCodes, message: '2FA activée avec succès.' });
 }));
 
-// ✅ NOUVEAU : Désactiver la 2FA
 router.post('/2fa/disable', requireAuth, limiters.sensitive, validate({
   body: z.object({ password: z.string().min(1).max(128) }).strict()
 }), asyncHandler(async (req, res) => {
@@ -347,7 +414,6 @@ router.post('/2fa/disable', requireAuth, limiters.sensitive, validate({
   ok(res, { message: '2FA désactivée' });
 }));
 
-// ✅ NOUVEAU : Régénérer les codes de secours
 router.post('/2fa/regenerate-backup-codes', requireAuth, limiters.sensitive, validate({
   body: z.object({ password: z.string().min(1).max(128), code: z.string().regex(/^\d{6}$/) }).strict()
 }), asyncHandler(async (req, res) => {
@@ -365,7 +431,6 @@ router.post('/2fa/regenerate-backup-codes', requireAuth, limiters.sensitive, val
   ok(res, { backupCodes });
 }));
 
-// ✅ NOUVEAU : Statut 2FA
 router.get('/2fa/status', requireAuth, asyncHandler(async (req, res) => {
   const u = await db.one('SELECT totp_enabled, totp_backup_codes FROM users WHERE id = ?', [req.user.id]);
   let backupCodesRemaining = 0;
@@ -378,7 +443,9 @@ router.get('/2fa/status', requireAuth, asyncHandler(async (req, res) => {
   });
 }));
 
-// Vérifier le PIN
+// ============================================================
+// PIN : vérification, set, remove, status
+// ============================================================
 router.post('/pin/verify', requireAuth, limiters.sensitive, validate({
   body: z.object({ pin: z.string().regex(/^\d{4}$/, 'Le PIN doit comporter 4 chiffres') }).strict()
 }), asyncHandler(async (req, res) => {
@@ -413,7 +480,6 @@ router.post('/pin/verify', requireAuth, limiters.sensitive, validate({
   ok(res, { message: 'PIN validé' });
 }));
 
-// Définir le PIN
 router.post('/pin/set', requireAuth, limiters.sensitive, validate({
   body: z.object({
     pin: z.string().regex(/^\d{4}$/, 'Le PIN doit comporter 4 chiffres'),
@@ -436,7 +502,6 @@ router.post('/pin/set', requireAuth, limiters.sensitive, validate({
   ok(res, { message: 'Code PIN enregistré' });
 }));
 
-// Désactiver le PIN
 router.post('/pin/remove', requireAuth, limiters.sensitive, validate({
   body: z.object({ password: z.string().min(1).max(128) }).strict()
 }), asyncHandler(async (req, res) => {
@@ -451,7 +516,6 @@ router.post('/pin/remove', requireAuth, limiters.sensitive, validate({
   ok(res, { message: 'Code PIN désactivé' });
 }));
 
-// Statut du PIN
 router.get('/pin/status', requireAuth, asyncHandler(async (req, res) => {
   const u = await db.one('SELECT pin_hash IS NOT NULL AS has_pin, pin_locked_until FROM users WHERE id = ?', [req.user.id]);
   ok(res, {
@@ -461,7 +525,9 @@ router.get('/pin/status', requireAuth, asyncHandler(async (req, res) => {
   });
 }));
 
-// Historique des connexions
+// ============================================================
+// HISTORIQUE DES CONNEXIONS
+// ============================================================
 router.get('/login-history', requireAuth, validate({ query: z.object({ ...s.page }).strict() }), asyncHandler(async (req, res) => {
   const p = pageParams(req.query);
   const total = await db.one('SELECT COUNT(*) AS n FROM login_history WHERE user_id = ?', [req.user.id]);
@@ -472,6 +538,9 @@ router.get('/login-history', requireAuth, validate({ query: z.object({ ...s.page
   ok(res, camel(rows), pageMeta(p, total.n));
 }));
 
+// ============================================================
+// DÉCONNEXION
+// ============================================================
 router.post('/logout', asyncHandler(async (req, res) => {
   if (req.session) {
     await db.query('UPDATE sessions SET revoked_at = UTC_TIMESTAMP() WHERE id = ?', [req.session.id]);
@@ -483,6 +552,9 @@ router.post('/logout', asyncHandler(async (req, res) => {
 
 router.get('/me', requireAuth, (req, res) => ok(res, { user: req.user, csrfToken: req.session.csrfToken }));
 
+// ============================================================
+// MOT DE PASSE OUBLIÉ
+// ============================================================
 router.post('/forgot-password', limiters.emailSend, validate({ body: z.object({ email: s.email }).strict() }),
   asyncHandler(async (req, res) => {
     const u = await db.one("SELECT id, email, full_name FROM users WHERE email = ? AND status = 'active'", [req.body.email]);

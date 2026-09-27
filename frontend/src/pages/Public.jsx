@@ -30,7 +30,7 @@ export function Home() {
     <div className="pub">
       <PublicNav />
 
-      {/* ============ 1. HERO ============ */}
+      {/* 1. HERO */}
       <section className="hero">
         <div>
           <h1>
@@ -49,7 +49,7 @@ export function Home() {
         <Coin3D />
       </section>
 
-      {/* ============ 2. CHIFFRES CLÉS ============ */}
+      {/* 2. CHIFFRES CLÉS */}
       <section className="landing-stats">
         {[
           ['100%', 'Sécurisé', 'Chiffrement des données & 2FA'],
@@ -67,7 +67,7 @@ export function Home() {
         ))}
       </section>
 
-      {/* ============ 3. FONCTIONNALITÉS ============ */}
+      {/* 3. FONCTIONNALITÉS */}
       <section className="landing-section">
         <div className="landing-head">
           <h2>Tout ce qu'il faut pour gérer vos tontines</h2>
@@ -95,7 +95,7 @@ export function Home() {
         </div>
       </section>
 
-      {/* ============ 4. COMMENT ÇA MARCHE ============ */}
+      {/* 4. COMMENT ÇA MARCHE */}
       <section className="landing-section" id="how-it-works">
         <div className="landing-head">
           <h2>Comment ça marche ?</h2>
@@ -119,7 +119,7 @@ export function Home() {
         </div>
       </section>
 
-      {/* ============ 5. CTA FINAL ============ */}
+      {/* 5. CTA FINAL */}
       <section className="landing-cta">
         <Reveal>
           <div className="cta-card">
@@ -135,7 +135,7 @@ export function Home() {
         </Reveal>
       </section>
 
-      {/* ============ 6. FOOTER ============ */}
+      {/* 6. FOOTER */}
       <footer className="landing-footer">
         <div className="footer-grid">
           <div>
@@ -174,7 +174,7 @@ export function Home() {
 }
 
 // ============================================================
-// Shell public (utilisé par les pages Login/Register/etc.)
+// Shell public
 // ============================================================
 const Shell = ({ title, children }) => (
   <div className="pub">
@@ -189,28 +189,69 @@ const Shell = ({ title, children }) => (
 );
 
 // ============================================================
-// INSCRIPTION
+// ✅ INSCRIPTION PAR TOKEN (sécurisée)
 // ============================================================
 export function Register() {
+  const [p] = useSearchParams();
+  const token = p.get('token');
   const [f, setF] = useState({ fullName: '', email: '', phone: '', password: '' });
   const [done, setDone] = useState(false);
   const a = useAction();
+
+  // ❌ Si pas de token → afficher un message
+  if (!token) {
+    return (
+      <Shell title="Invitation requise">
+        <Msg kind="err">
+          L'inscription est réservée aux personnes invitées par un gestionnaire de tontine.
+          Si vous avez reçu un lien d'invitation, cliquez dessus depuis votre email.
+        </Msg>
+        <p className="mut sm mt">
+          Vous avez déjà un compte ? <Link to="/connexion">Se connecter</Link>
+        </p>
+      </Shell>
+    );
+  }
+
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value });
   const submit = async (e) => {
     e.preventDefault();
-    const body = { ...f };
+    const body = { token, ...f };
     if (!body.phone) delete body.phone;
-    if (await a.run(() => api('/auth/register', { method: 'POST', body }))) setDone(true);
+    if (await a.run(() => api('/auth/register-invited', { method: 'POST', body }))) {
+      setDone(true);
+    }
   };
-  if (done) return <Shell title="Vérifiez votre boîte mail"><Msg kind="ok">Si les informations sont valides, un email de confirmation vient d'être envoyé. Cliquez sur le lien pour activer votre compte.</Msg><Link to="/connexion">Aller à la connexion</Link></Shell>;
+
+  if (done) {
+    return (
+      <Shell title="Compte créé ✅">
+        <Msg kind="ok">
+          Votre compte a été créé et vous avez été rattaché à la tontine.
+          Vous pouvez maintenant vous connecter.
+        </Msg>
+        <Link className="btn mt" to="/connexion">Se connecter</Link>
+      </Shell>
+    );
+  }
+
   return (
-    <Shell title="Créer un compte">
+    <Shell title="Créer mon compte">
+      <p className="mut sm" style={{ marginTop: '-.3rem', marginBottom: '1rem' }}>
+        Vous avez été invité à rejoindre une tontine. Créez votre compte pour y accéder.
+      </p>
       <form onSubmit={submit}>
-        <label>Nom complet</label><input required value={f.fullName} onChange={set('fullName')} autoComplete="name" />
-        <label>Email</label><input required type="email" value={f.email} onChange={set('email')} autoComplete="email" />
-        <label>Téléphone (facultatif)</label><input value={f.phone} onChange={set('phone')} autoComplete="tel" placeholder="+229 ..." />
-        <label>Mot de passe (10 caractères min.)</label><input required type="password" minLength={10} value={f.password} onChange={set('password')} autoComplete="new-password" />
-        <Msg>{a.error}</Msg><button className="btn mt" disabled={a.busy}>{a.busy ? '…' : 'Créer mon compte'}</button>
+        <label>Nom complet *</label>
+        <input required value={f.fullName} onChange={set('fullName')} autoComplete="name" />
+        <label>Email *</label>
+        <input required type="email" value={f.email} onChange={set('email')} autoComplete="email"
+          placeholder="Utilisez l'email qui a reçu l'invitation" />
+        <label>Téléphone (facultatif)</label>
+        <input value={f.phone} onChange={set('phone')} autoComplete="tel" placeholder="+229 ..." />
+        <label>Mot de passe * (10 caractères min.)</label>
+        <input required type="password" minLength={10} value={f.password} onChange={set('password')} autoComplete="new-password" />
+        <Msg>{a.error}</Msg>
+        <button className="btn mt" disabled={a.busy}>{a.busy ? '…' : 'Créer mon compte'}</button>
       </form>
       <p className="mut sm mt">Déjà inscrit ? <Link to="/connexion">Se connecter</Link></p>
     </Shell>

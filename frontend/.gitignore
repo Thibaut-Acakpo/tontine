@@ -3,4 +3,6 @@ node_modules/
 .env.*.local
 dist/
 .vite/
+dev-dist/
 *.log
+.DS_Store

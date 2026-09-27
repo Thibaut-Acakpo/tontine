@@ -1,7 +1,7 @@
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { useAuth } from './auth.jsx';
 import Layout from './components/Layout.jsx';
-import { Home, Login, Forgot, Reset, VerifyEmail, VerifyPin, Verify2FA } from './pages/Public.jsx';
+import { Home, Login, Register, Forgot, Reset, VerifyEmail, VerifyPin, Verify2FA } from './pages/Public.jsx';
 import { Privacy, Terms } from './pages/Legal.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import Tontines from './pages/Tontines.jsx';
@@ -20,17 +20,15 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
-      <Route path="/inscription" element={<Navigate to="/connexion" replace />} />
+      <Route path="/inscription" element={<Register />} />
       <Route path="/connexion" element={<Login />} />
       <Route path="/mot-de-passe-oublie" element={<Forgot />} />
       <Route path="/reinitialiser-mot-de-passe" element={<Reset />} />
       <Route path="/verifier-email" element={<VerifyEmail />} />
 
-      {/* ✅ Pages légales (sans mentions) */}
       <Route path="/confidentialite" element={<Privacy />} />
       <Route path="/cgu" element={<Terms />} />
 
-      {/* 2FA et PIN */}
       <Route path="/2fa" element={<Verify2FA />} />
       <Route path="/pin" element={<Private><VerifyPin /></Private>} />
 
