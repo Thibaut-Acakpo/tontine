@@ -1,5 +1,7 @@
+import { useEffect } from 'react';
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { useAuth } from './auth.jsx';
+import { setCsrf } from './api.js';
 import Layout from './components/Layout.jsx';
 import { Home, Login, Register, Forgot, Reset, VerifyEmail, VerifyPin, Verify2FA } from './pages/Public.jsx';
 import { Privacy, Terms } from './pages/Legal.jsx';
@@ -17,6 +19,16 @@ function Private({ children, admin }) {
 }
 
 export default function App() {
+  // ✅ NOUVEAU : recharge le CSRF token au démarrage de l'app
+  useEffect(() => {
+  fetch('/api/auth/me', { credentials: 'include' })
+    .then((r) => (r.ok ? r.json() : null))
+    .then((data) => {
+      if (data?.csrfToken) setCsrf(data.csrfToken);
+    })
+    .catch(() => {});
+}, []);
+
   return (
     <Routes>
       <Route path="/" element={<Home />} />

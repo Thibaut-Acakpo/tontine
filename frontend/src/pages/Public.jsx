@@ -13,13 +13,20 @@ import { Icons } from '../components/Icons.jsx';
 export function PublicNav() {
   const { user } = useAuth();
   const { t } = useTranslation();
+  const location = useLocation();
+  // ✅ Bouton "Mon espace" caché sur /pin et /2fa (étapes d'auth en cours)
+  const isAuthFlow = ['/pin', '/2fa'].includes(location.pathname);
+
   return (
     <nav className="pubnav">
       <Link to="/" className="brand"><i>₣</i> Tontine</Link>
       <div className="row">
-        {user
-          ? <Link className="btn" to="/app">{t('auth.mySpace')}</Link>
-          : <Link className="btn" to="/connexion">{t('auth.login')}</Link>}
+        {user && !isAuthFlow && (
+          <Link className="btn" to="/app">{t('auth.mySpace')}</Link>
+        )}
+        {!user && (
+          <Link className="btn" to="/connexion">{t('auth.login')}</Link>
+        )}
       </div>
     </nav>
   );
