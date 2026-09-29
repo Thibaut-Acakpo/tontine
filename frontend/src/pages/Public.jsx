@@ -67,6 +67,7 @@ export function Home() {
           <div className="row mt" style={{ gap: '.6rem' }}>
             <Link className="btn" to="/connexion">{t('home.accessSpace')}</Link>
             <a className="btn ghost" href="#how-it-works">{t('home.howItWorks')}</a>
+            <a className="btn ghost" href="#contact">{t('contact.button')}</a>
           </div>
         </div>
         <Coin3D />
@@ -155,6 +156,45 @@ export function Home() {
         </Reveal>
       </section>
 
+      {/* 5b. CONTACT */}
+      <section className="landing-section contact-section" id="contact">
+        <div className="landing-head">
+          <h2>{t('contact.title')}</h2>
+          <p className="mut">{t('contact.desc')}</p>
+        </div>
+
+        <Reveal>
+          <div className="contact-grid">
+            <a className="contact-card" href="mailto:acakpothibaut2@gmail.com">
+              <div className="contact-icon">📧</div>
+              <div className="contact-label">{t('contact.email')}</div>
+              <div className="contact-value">acakpothibaut2@gmail.com</div>
+            </a>
+
+            <a
+              className="contact-card"
+              href="https://wa.me/2290199911438?text=Bonjour%2C%20je%20souhaite%20g%C3%A9rer%20mes%20tontines%20avec%20Tontine."
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <div className="contact-icon">💬</div>
+              <div className="contact-label">{t('contact.whatsapp')}</div>
+              <div className="contact-value">+229 01 99 91 14 38</div>
+            </a>
+
+            <a className="contact-card" href="tel:+2290199911438">
+              <div className="contact-icon">📞</div>
+              <div className="contact-label">{t('contact.call')}</div>
+              <div className="contact-value">+229 01 99 91 14 38</div>
+            </a>
+          </div>
+
+          <p className="mut sm" style={{ textAlign: 'center', marginTop: '1.5rem' }}>
+            ⏱️ {t('contact.responseTime')}
+          </p>
+        </Reveal>
+      </section>
+
       {/* 6. FOOTER */}
       <footer className="landing-footer">
         <div className="footer-grid">
@@ -166,6 +206,7 @@ export function Home() {
             <h4>{t('home.footerNav')}</h4>
             <ul>
               <li><a href="#how-it-works">{t('home.howItWorks')}</a></li>
+              <li><a href="#contact">{t('contact.button')}</a></li>
               <li><Link to="/connexion">{t('auth.login')}</Link></li>
             </ul>
           </div>
@@ -179,8 +220,9 @@ export function Home() {
           <div>
             <h4>{t('home.footerContact')}</h4>
             <ul>
-              <li><a href="mailto:contact@tontine.app">acakpothibaut2@gmail.com</a></li>
-              <li><a href="tel:+22999999999">01 99 91 14 38</a></li>
+              <li><a href="mailto:acakpothibaut2@gmail.com">acakpothibaut2@gmail.com</a></li>
+              <li><a href="https://wa.me/2290199911438" target="_blank" rel="noopener noreferrer">WhatsApp</a></li>
+              <li><a href="tel:+2290199911438">+229 01 99 91 14 38</a></li>
             </ul>
           </div>
         </div>

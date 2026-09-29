@@ -512,7 +512,18 @@ const resources = {
       'payments.toPay': 'À payer',
       'payments.history': 'Historique récent',
       'payments.last3Months': '3 derniers mois',
-      'payments.noHistory': 'Aucun paiement enregistré sur les 3 derniers mois.',
+            'payments.noHistory': 'Aucun paiement enregistré sur les 3 derniers mois.',
+
+      // ============================================================
+      // CONTACT
+      // ============================================================
+      'contact.title': 'Vous souhaitez gérer vos tontines ?',
+      'contact.desc': 'Contactez-nous pour créer votre compte gestionnaire et digitaliser vos tontines en quelques minutes.',
+      'contact.email': 'Email',
+      'contact.whatsapp': 'WhatsApp',
+      'contact.call': 'Appel',
+      'contact.button': 'Nous contacter',
+      'contact.responseTime': 'Réponse en moins de 24h',
     },
   },
 
@@ -1027,7 +1038,18 @@ const resources = {
       'payments.toPay': 'To pay',
       'payments.history': 'Recent history',
       'payments.last3Months': 'Last 3 months',
-      'payments.noHistory': 'No payment recorded in the last 3 months.',
+            'payments.noHistory': 'No payment recorded in the last 3 months.',
+
+      // ============================================================
+      // CONTACT
+      // ============================================================
+      'contact.title': 'Want to manage your tontines?',
+      'contact.desc': 'Contact us to create your manager account and digitize your tontines in minutes.',
+      'contact.email': 'Email',
+      'contact.whatsapp': 'WhatsApp',
+      'contact.call': 'Call',
+      'contact.button': 'Contact us',
+      'contact.responseTime': 'Reply within 24h',
     },
   },
 };
