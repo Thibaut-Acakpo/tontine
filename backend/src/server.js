@@ -7,7 +7,11 @@ const { startCron } = require('./services/cron');
 
 try { config.assertSafe(); } catch (err) { process.stderr.write(`${err.message}\n`); process.exit(1); }
 
-const server = createApp().listen(config.port, () => logger.info(`API démarrée sur le port ${config.port} (${config.env})`));
+const server = createApp().listen(
+  config.port,
+  '0.0.0.0',  // ← CRUCIAL : écoute sur toutes les interfaces réseau
+  () => logger.info(`API démarrée sur le port ${config.port} (${config.env})`)
+);
 
 // ✅ Démarrer les tâches cron (rappels push quotidiens)
 startCron();
