@@ -1,6 +1,8 @@
-# 🪙 Tontine — Plateforme de gestion de tontines
+# 🪙 Tontine
 
-> Application web moderne pour digitaliser les tontines : transparence, traçabilité et sécurité.
+Plateforme web moderne de gestion des tontines, conçue pour digitaliser l’épargne collective rotative et remplacer la gestion traditionnelle sur cahier.
+
+L’application met l’accent sur la transparence, la traçabilité, la sécurité et la simplicité d’utilisation.
 
 ![Version](https://img.shields.io/badge/version-1.0.0-blue)
 ![Node](https://img.shields.io/badge/node-%3E%3D20-brightgreen)
@@ -10,239 +12,565 @@
 
 ## 📖 Description
 
-**Tontine** est une plateforme complète pour gérer les tontines (systèmes d'épargne collective rotative). Elle remplace le cahier papier traditionnel par une solution digitale sécurisée.
+**Tontine** permet de gérer une tontine de manière centralisée.
 
-### ✨ Fonctionnalités principales
+La plateforme permet notamment de :
 
-| Fonctionnalité | Description |
-|----------------|-------------|
-| 🔐 **Authentification complète** | Mot de passe, code PIN, 2FA (Google Authenticator) |
-| 👥 **Gestion multi-rôles** | Admin, gestionnaire, trésorier, membre |
-| 💰 **Gestion des tontines** | Création, membres, tours, ordre des bénéficiaires |
-| 💳 **Paiements** | Enregistrement en espèces, versements aux bénéficiaires |
-| 📧 **Notifications** | Email (Gmail SMTP), push (OneSignal) |
-| 🌍 **Multilingue** | Français / Anglais |
-| 🌓 **Thème** | Sombre / Clair |
-| 📊 **Statistiques** | Tableau de bord, graphiques, export PDF |
-| 📱 **PWA** | Installable sur mobile |
-| 🔔 **Rappels automatiques** | Cron quotidien pour les échéances |
-
----
-
-## 🛠️ Stack technique
-
-### Frontend
-- **React 19** + Vite
-- **React Router** (navigation)
-- **React-i18next** (multilingue)
-- **Recharts** (graphiques)
-- **jsPDF + AutoTable** (export PDF)
-- **Lucide React** (icônes)
-- **PWA** (vite-plugin-pwa)
-
-### Backend
-- **Node.js 20+** + Express
-- **MariaDB / MySQL** (mysql2)
-- **argon2** (hash mots de passe)
-- **otplib** (2FA TOTP)
-- **nodemailer** (SMTP)
-- **@emailjs/nodejs** (fallback emails)
-- **node-cron** (tâches planifiées)
-- **nodemon** (dev)
+* créer et gérer des tontines
+* gérer les membres
+* définir l’ordre des bénéficiaires
+* enregistrer les cotisations
+* suivre les paiements
+* gérer les versements aux bénéficiaires
+* suivre les échéances
+* envoyer des notifications
+* consulter les statistiques
+* exporter les données en PDF
+* utiliser l'application sur mobile grâce à la PWA
 
 ---
 
-## 📁 Structure du projet
+## ✨ Fonctionnalités
+
+### 🔐 Authentification et sécurité
+
+* Authentification par email et mot de passe
+* Code PIN à 4 chiffres
+* Authentification à deux facteurs avec Google Authenticator
+* Verrouillage après plusieurs tentatives échouées
+* Sessions sécurisées avec cookies HttpOnly
+* Protection CSRF
+* Rate limiting
+* Journal d'audit
+* Protection des routes sensibles
+* Headers HTTP sécurisés avec Helmet
+* Configuration CORS stricte
+
+### 👥 Gestion des utilisateurs
+
+Plusieurs rôles sont disponibles :
+
+* Administrateur
+* Gestionnaire
+* Trésorier
+* Membre
+
+Chaque rôle possède des permissions adaptées à ses responsabilités.
+
+### 💰 Gestion des tontines
+
+* Création d'une tontine
+* Modification des informations
+* Gestion des membres
+* Ajout et retrait de membres
+* Définition des cotisations
+* Définition des échéances
+* Gestion des tours
+* Définition de l'ordre des bénéficiaires
+* Suivi de l'état de la tontine
+
+### 💳 Gestion des paiements
+
+* Enregistrement des cotisations
+* Paiements en espèces
+* Suivi des paiements
+* Historique des transactions
+* Suivi des versements aux bénéficiaires
+* Traçabilité des opérations
+
+### 📧 Notifications
+
+* Notifications par email
+* SMTP Gmail
+* EmailJS comme solution de secours
+* Rappels automatiques
+* Notifications liées aux échéances
+
+### 🌍 Multilingue
+
+L'application prend en charge :
+
+* 🇫🇷 Français
+* 🇬🇧 Anglais
+
+La gestion des traductions utilise `react-i18next`.
+
+### 🌓 Thème
+
+L'utilisateur peut choisir entre :
+
+* Mode clair
+* Mode sombre
+
+### 📊 Tableau de bord et statistiques
+
+* Vue générale de l'activité
+* Statistiques des tontines
+* Suivi des cotisations
+* Suivi des paiements
+* Graphiques
+* Export des données en PDF
+
+### 📱 Progressive Web App
+
+L'application est installable sur mobile et peut être utilisée comme une application.
+
+#### Android
+
+1. Ouvrir l'application avec Chrome.
+2. Ouvrir le menu du navigateur.
+3. Sélectionner « Ajouter à l'écran d'accueil ».
+
+#### iOS
+
+1. Ouvrir l'application avec Safari.
+2. Appuyer sur le bouton Partager.
+3. Sélectionner « Sur l'écran d'accueil ».
+
+### 🔔 Rappels automatiques
+
+Un système de tâches planifiées permet d'exécuter automatiquement certaines opérations, notamment les rappels liés aux échéances.
+
+Technologie utilisée :
+
+`node-cron`
+
+---
+
+# 🛠️ Stack technique
+
+## Frontend
+
+* React 19
+* Vite
+* React Router
+* React-i18next
+* Recharts
+* jsPDF
+* AutoTable
+* Lucide React
+* vite-plugin-pwa
+
+## Backend
+
+* Node.js 20+
+* Express
+* MariaDB / MySQL
+* mysql2
+* argon2
+* otplib
+* Nodemailer
+* @emailjs/nodejs
+* node-cron
+* Nodemon
+
+---
+
+# 📁 Structure du projet
+
+```text
 tontine/
-├── backend/ # API REST Node.js
-│ ├── src/
-│ │ ├── middleware/ # Auth, sécurité, validation
-│ │ ├── routes/ # Routes API
-│ │ ├── services/ # Logique métier
-│ │ ├── utils/ # Utilitaires
-│ │ ├── app.js # Configuration Express
-│ │ ├── server.js # Point d'entrée
-│ │ ├── config.js # Configuration
-│ │ ├── db.js # Connexion MySQL
-│ │ └── mailer.js # Envoi d'emails
-│ ├── scripts/ # Scripts (migrations, backup, seed)
-│ ├── sql/ # Fichiers SQL
-│ ├── .env.example # Variables d'environnement (modèle)
-│ └── package.json
 │
-├── frontend/ # Interface React
-│ ├── src/
-│ │ ├── components/ # Composants réutilisables
-│ │ ├── pages/ # Pages de l'app
-│ │ ├── utils/ # Utilitaires (PDF...)
-│ │ ├── App.jsx # Routes
-│ │ ├── main.jsx # Point d'entrée
-│ │ ├── api.js # Client API
-│ │ ├── auth.jsx # Contexte auth
-│ │ ├── i18n.js # Traductions
-│ │ └── styles.css # Styles globaux
-│ ├── public/ # Assets statiques
-│ └── package.json
+├── backend/
+│   ├── src/
+│   │   ├── middleware/
+│   │   │   ├── auth.js
+│   │   │   ├── security.js
+│   │   │   └── validation.js
+│   │   │
+│   │   ├── routes/
+│   │   │   ├── auth.js
+│   │   │   ├── tontines.js
+│   │   │   ├── members.js
+│   │   │   ├── payments.js
+│   │   │   └── admin.js
+│   │   │
+│   │   ├── services/
+│   │   │   ├── authService.js
+│   │   │   ├── tontineService.js
+│   │   │   ├── paymentService.js
+│   │   │   └── notificationService.js
+│   │   │
+│   │   ├── utils/
+│   │   │   ├── security.js
+│   │   │   ├── validation.js
+│   │   │   └── helpers.js
+│   │   │
+│   │   ├── app.js
+│   │   ├── server.js
+│   │   ├── config.js
+│   │   ├── db.js
+│   │   └── mailer.js
+│   │
+│   ├── scripts/
+│   │   ├── migrate.js
+│   │   ├── seed.js
+│   │   ├── backup.js
+│   │   └── restore.js
+│   │
+│   ├── sql/
+│   │   └── migrations/
+│   │
+│   ├── .env.example
+│   └── package.json
 │
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   ├── pages/
+│   │   ├── utils/
+│   │   ├── App.jsx
+│   │   ├── main.jsx
+│   │   ├── api.js
+│   │   ├── auth.jsx
+│   │   ├── i18n.js
+│   │   └── styles.css
+│   │
+│   ├── public/
+│   │   └── assets/
+│   │
+│   └── package.json
+│
+├── SECURITE.md
 └── README.md
-
-text
+```
 
 ---
 
-## 🚀 Installation
+# 🚀 Installation
 
-### Prérequis
+## Prérequis
 
-- **Node.js** ≥ 20
-- **MariaDB** ou **MySQL** ≥ 8
-- **npm** ou **yarn**
+Installez les éléments suivants :
 
-### 1. Cloner le projet
+* Node.js 20 ou supérieur
+* npm ou Yarn
+* MariaDB ou MySQL 8 ou supérieur
+* Git
+
+---
+
+## 1. Cloner le projet
 
 ```bash
 git clone https://github.com/Thibaut-Acakpo/tontine.git
 cd tontine
-2. Backend
-bash
+```
+
+---
+
+## 2. Configurer le backend
+
+```bash
 cd backend
 npm install
+```
 
-# Copier et configurer les variables
+Copiez le fichier d'environnement :
+
+```bash
 cp .env.example .env
-# Éditez .env avec vos identifiants
-Variables importantes à configurer dans .env :
+```
 
-env
+Puis configurez le fichier `.env`.
+
+### Variables principales
+
+```env
 DB_HOST=127.0.0.1
 DB_PORT=3306
 DB_NAME=tontine
 DB_USER=votre_user
 DB_PASSWORD=votre_password
 
-# Admin (créé au premier seed)
 ADMIN_EMAIL=admin@example.com
 ADMIN_PASSWORD=change_me
 
-# Email (Gmail SMTP recommandé)
 GMAIL_USER=your@gmail.com
 GMAIL_APP_PASSWORD=xxxx xxxx xxxx xxxx
-Créer la base de données :
+```
 
-bash
-# Créer la base dans MySQL
+Ne publiez jamais votre fichier `.env` sur GitHub.
+
+---
+
+## 3. Créer la base de données
+
+Avec MySQL :
+
+```bash
 mysql -u root -e "CREATE DATABASE tontine CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+```
 
-# Lancer les migrations
+---
+
+## 4. Exécuter les migrations
+
+```bash
 npm run migrate
+```
 
-# Créer l'admin
+---
+
+## 5. Créer le compte administrateur
+
+```bash
 npm run seed
+```
 
-# Démarrer en dev
+---
+
+## 6. Démarrer le backend
+
+En développement :
+
+```bash
 npm run dev
-Backend accessible sur http://localhost:3001.
+```
 
-3. Frontend
-bash
-cd ../frontend
+En production :
+
+```bash
+npm start
+```
+
+Le backend est accessible à :
+
+```text
+http://localhost:3001
+```
+
+---
+
+# 💻 Installation du frontend
+
+Depuis le dossier racine :
+
+```bash
+cd frontend
 npm install
+```
+
+Démarrer le serveur de développement :
+
+```bash
 npm run dev
-Frontend accessible sur http://localhost:5173.
+```
 
-📜 Scripts disponibles
-Backend
-Script	Description
-npm start	Démarrer en production
-npm run dev	Démarrer en dev (nodemon)
-npm run migrate	Appliquer les migrations
-npm run seed	Créer l'admin
-npm run backup	Sauvegarder la base
-npm run restore	Restaurer une sauvegarde
-npm test	Lancer les tests
-Frontend
-Script	Description
-npm run dev	Démarrer Vite en dev
-npm run build	Build de production
-npm run preview	Prévisualiser le build
-🔐 Sécurité
-✅ Mots de passe hashés avec argon2id
+Le frontend est accessible à :
 
-✅ Sessions avec cookies HttpOnly + CSRF tokens
+```text
+http://localhost:5173
+```
 
-✅ 2FA disponible pour tous les comptes
+---
 
-✅ Code PIN à 4 chiffres (verrouillage après 3 échecs)
+# 📜 Scripts disponibles
 
-✅ Rate limiting sur les endpoints sensibles
+## Backend
 
-✅ Verrouillage après 5 tentatives échouées
+| Commande          | Description                          |
+| ----------------- | ------------------------------------ |
+| `npm start`       | Démarrer le serveur en production    |
+| `npm run dev`     | Démarrer le serveur en développement |
+| `npm run migrate` | Exécuter les migrations              |
+| `npm run seed`    | Créer les données initiales          |
+| `npm run backup`  | Sauvegarder la base de données       |
+| `npm run restore` | Restaurer une sauvegarde             |
+| `npm test`        | Exécuter les tests                   |
 
-✅ Journal d'audit de toutes les actions
+## Frontend
 
-✅ CORS configuré strictement
+| Commande          | Description                    |
+| ----------------- | ------------------------------ |
+| `npm run dev`     | Démarrer Vite                  |
+| `npm run build`   | Générer le build de production |
+| `npm run preview` | Prévisualiser le build         |
 
-✅ Helmet pour les headers HTTP
+---
 
-📱 Installation PWA
-Android (Chrome)
-Ouvrir l'app dans Chrome
+# 🔐 Sécurité
 
-Menu → "Ajouter à l'écran d'accueil"
+La plateforme intègre plusieurs mécanismes de sécurité :
 
-iOS (Safari)
-Ouvrir l'app dans Safari
+* Hashage des mots de passe avec Argon2id
+* Sessions avec cookies HttpOnly
+* Protection CSRF
+* Authentification 2FA avec TOTP
+* Code PIN à 4 chiffres
+* Verrouillage après 3 erreurs de PIN
+* Verrouillage après 5 tentatives d'authentification échouées
+* Rate limiting sur les endpoints sensibles
+* Journalisation des actions
+* CORS strict
+* Helmet pour les headers HTTP
+* Validation des données
+* Protection des routes selon les rôles
 
-Bouton Partager → "Sur l'écran d'accueil"
+La documentation complète est disponible dans :
 
-🌍 Déploiement
-Recommandé
-Service	Rôle	Coût
-Render	Backend Node.js	Gratuit
-Vercel	Frontend React	Gratuit
-Railway	Base MySQL	Gratuit
-UptimeRobot	Anti cold-start	Gratuit
-Étapes rapides
-Base de données sur Railway → importer un dump
+```text
+SECURITE.md
+```
 
-Backend sur Render → connecter le repo GitHub + variables .env
+---
 
-Frontend sur Vercel → connecter + VITE_API_URL=https://xxx.onrender.com
+# 🌍 Déploiement
 
-Anti cold-start : UptimeRobot sur /api/health
+L'architecture recommandée sépare les différents services :
 
-📸 Captures d'écran
-À ajouter : captures du Dashboard, Tontines, Paiements, Admin
+| Service     | Rôle                                |
+| ----------- | ----------------------------------- |
+| Render      | Backend Node.js                     |
+| Vercel      | Frontend React                      |
+| Railway     | Base de données MySQL               |
+| UptimeRobot | Surveillance et maintien du service |
 
-🤝 Contribution
-Les contributions sont les bienvenues !
+## Déploiement du backend
 
-Fork le projet
+1. Connecter le dépôt GitHub à Render.
+2. Sélectionner le dossier `backend`.
+3. Configurer les variables d'environnement.
+4. Déployer le serveur Node.js.
+5. Vérifier l'endpoint de santé.
 
-Créer une branche (git checkout -b feature/ma-feature)
+Exemple :
 
-Commit (git commit -m 'Ajout de ma feature')
+```text
+https://votre-backend.onrender.com/api/health
+```
 
-Push (git push origin feature/ma-feature)
+## Déploiement du frontend
 
-Ouvrir une Pull Request
+Configurer le frontend sur Vercel.
 
-👤 Auteur
-ACAKPO Thibaut
+La variable suivante doit pointer vers l'URL du backend :
 
-GitHub : @Thibaut-Acakpo
+```env
+VITE_API_URL=https://votre-backend.onrender.com
+```
 
-Email : acakpothibaut2@gmail.com
+## Surveillance
 
-🙏 Remerciements
-React
+UptimeRobot peut surveiller régulièrement :
 
-Vite
+```text
+/api/health
+```
 
-Express
+Cela permet de détecter rapidement une interruption du backend.
 
-Lucide Icons
+---
 
-Recharts
+# 📊 Fonctionnement général
 
-<div align="center"> <sub>Fait avec ❤️ pour digitaliser les tontines</sub> </div>
+Le fonctionnement de la plateforme repose sur plusieurs espaces :
+
+```text
+Utilisateur
+    │
+    ▼
+Authentification
+    │
+    ▼
+Tableau de bord
+    │
+    ├── Tontines
+    │     ├── Membres
+    │     ├── Cotisations
+    │     ├── Tours
+    │     └── Bénéficiaires
+    │
+    ├── Paiements
+    │     ├── Cotisations
+    │     ├── Versements
+    │     └── Historique
+    │
+    ├── Notifications
+    │
+    ├── Statistiques
+    │
+    └── Administration
+```
+
+---
+
+# 📸 Captures d'écran
+
+Les captures d'écran suivantes seront ajoutées prochainement :
+
+* Tableau de bord
+* Gestion des tontines
+* Gestion des membres
+* Gestion des paiements
+* Statistiques
+* Administration
+* Authentification
+
+---
+
+# 🤝 Contribution
+
+Les contributions sont les bienvenues.
+
+### 1. Forker le projet
+
+### 2. Créer une branche
+
+```bash
+git checkout -b feature/ma-feature
+```
+
+### 3. Effectuer les modifications
+
+### 4. Créer un commit
+
+```bash
+git commit -m "Ajout de ma feature"
+```
+
+### 5. Envoyer la branche
+
+```bash
+git push origin feature/ma-feature
+```
+
+### 6. Ouvrir une Pull Request
+
+---
+
+# 📄 Licence
+
+Ce projet est distribué sous licence MIT.
+
+---
+
+# 👤 Auteur
+
+**ACAKPO Thibaut**
+
+GitHub : `@Thibaut-Acakpo`
+
+Email : `acakpothibaut2@gmail.com`
+
+---
+
+# 🙏 Remerciements
+
+Merci aux projets et technologies utilisés pour construire cette plateforme :
+
+* React
+* Vite
+* Express
+* MySQL
+* Lucide React
+* Recharts
+* Node.js
+
+---
+
+<div align="center">
+
+Fait avec ❤️ pour digitaliser la gestion des tontines.
+
+</div>
