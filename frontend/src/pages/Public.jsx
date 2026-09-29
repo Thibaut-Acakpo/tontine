@@ -164,7 +164,8 @@ export function Home() {
           <div>
             <h4>{t('home.footerContact')}</h4>
             <ul>
-              <li><a href="mailto:contact@tontine.app">contact@tontine.app</a></li>
+              <li><a href="mailto:contact@tontine.app">acakpothibaut2@gmail.com</a></li>
+              <li><a href="tel:+22999999999">01 99 91 14 38</a></li>
             </ul>
           </div>
         </div>

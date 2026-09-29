@@ -1,5 +1,9 @@
 // Client API : cookies de session HttpOnly (jamais lisibles par JS) + jeton CSRF gardé en mémoire uniquement.
 // Aucune clé secrète dans le frontend.
+
+// ✅ URL de l'API : en dev utilise le proxy Vite (vide), en prod utilise la variable d'environnement Vercel
+const API_URL = import.meta.env.VITE_API_URL || '';
+
 let csrfToken = null;
 export const setCsrf = (t) => { csrfToken = t; };
 
@@ -9,7 +13,12 @@ export async function api(path, { method = 'GET', body, headers = {}, raw = fals
   if (body instanceof FormData) opts.body = body;
   else if (body !== undefined) { opts.headers['Content-Type'] = 'application/json'; opts.body = JSON.stringify(body); }
   let res;
-  try { res = await fetch(`/api${path}`, opts); } catch { throw new Error('Serveur injoignable'); }
+  try {
+    // ✅ Utilise API_URL (vide en local → proxy Vite, rempli en prod → Render)
+    res = await fetch(`${API_URL}/api${path}`, opts);
+  } catch {
+    throw new Error('Serveur injoignable');
+  }
   if (raw) return res;
   const json = await res.json().catch(() => null);
   if (!res.ok || !json?.success) {
