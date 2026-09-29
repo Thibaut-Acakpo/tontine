@@ -12,15 +12,30 @@ import { Icons } from '../components/Icons.jsx';
 // ============================================================
 export function PublicNav() {
   const { user } = useAuth();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const location = useLocation();
-  // ✅ Bouton "Mon espace" caché sur /pin et /2fa (étapes d'auth en cours)
   const isAuthFlow = ['/pin', '/2fa'].includes(location.pathname);
+
+  const changeLanguage = (lang) => {
+    i18n.changeLanguage(lang);
+    localStorage.setItem('lang', lang);
+  };
 
   return (
     <nav className="pubnav">
       <Link to="/" className="brand"><i>₣</i> Tontine</Link>
-      <div className="row">
+      <div className="row" style={{ gap: '.5rem', alignItems: 'center' }}>
+        {/* ✅ Sélecteur de langue */}
+        <select
+          className="lang-select"
+          value={i18n.language?.split('-')[0] || 'fr'}
+          onChange={(e) => changeLanguage(e.target.value)}
+          aria-label="Changer de langue"
+        >
+          <option value="fr">🇫🇷 FR</option>
+          <option value="en">🇬🇧 EN</option>
+        </select>
+
         {user && !isAuthFlow && (
           <Link className="btn" to="/app">{t('auth.mySpace')}</Link>
         )}
