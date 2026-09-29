@@ -5,6 +5,7 @@ import {
   Copy, CheckCircle, XCircle, AlertTriangle, Info, Download,
   FileText, TrendingUp, Users, Calendar, Lock, Key, Smartphone,
   Mail, Phone, MapPin, Globe, Filter, ArrowUp, ArrowDown, Loader2,
+  MessageCircle,  // ✅ AJOUT pour WhatsApp
 } from 'lucide-react';
 
 export const Icons = {
@@ -52,4 +53,5 @@ export const Icons = {
   Up: ArrowUp,
   DownArrow: ArrowDown,
   Loading: Loader2,
+  WhatsApp: MessageCircle,  // ✅ AJOUT
 };

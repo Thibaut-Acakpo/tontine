@@ -65,11 +65,10 @@ h3 { font-size: 1.1rem; }
 .side {
   padding: 1.4rem 1rem;
   border-right: 1px solid var(--line);
-  backdrop-filter: blur(14px);
-  background: rgba(4, 16, 11, .55);
+  background: #06140f;
   position: sticky;
   top: 0;
-  height: 100vh;
+  min-height: 100vh;   /* ← CHANGE : s'adapte au contenu */
   display: flex;
   flex-direction: column;
   gap: .3rem;
@@ -1924,9 +1923,9 @@ select { max-width: 100%; }
 
 .contact-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 1.2rem;
-  max-width: 900px;
+  max-width: 800px;
   margin: 0 auto;
 }
 
@@ -1951,10 +1950,23 @@ select { max-width: 100%; }
   text-decoration: none;
 }
 
+/* ✅ Conteneur d'icône SVG doré */
 .contact-icon {
-  font-size: 2.4rem;
-  line-height: 1;
-  margin-bottom: .3rem;
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(242, 182, 50, .18), rgba(242, 182, 50, .05));
+  border: 1px solid rgba(242, 182, 50, .25);
+  color: var(--gold2);
+  margin-bottom: .8rem;
+  transition: transform .2s, box-shadow .2s;
+}
+
+.contact-card:hover .contact-icon {
+  transform: scale(1.1) rotate(-3deg);
+  box-shadow: 0 12px 32px -8px rgba(242, 182, 50, .5);
 }
 
 .contact-label {
@@ -1973,8 +1985,65 @@ select { max-width: 100%; }
   text-align: center;
 }
 
+/* ✅ Boutons d'action dans la case WhatsApp & Appel */
+.contact-actions {
+  display: flex;
+  gap: .5rem;
+  margin-top: 1rem;
+  width: 100%;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.contact-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  padding: .55rem 1rem;
+  border-radius: 10px;
+  font-size: .85rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: transform .15s, background .2s, border-color .2s;
+  border: 1px solid transparent;
+}
+
+.contact-action-btn:hover {
+  transform: translateY(-2px);
+  text-decoration: none;
+}
+
+.contact-action-btn.wa {
+  background: rgba(37, 211, 102, .12);
+  border-color: rgba(37, 211, 102, .35);
+  color: #4ade80;
+}
+
+.contact-action-btn.wa:hover {
+  background: rgba(37, 211, 102, .2);
+  border-color: rgba(37, 211, 102, .6);
+}
+
+.contact-action-btn.call {
+  background: rgba(242, 182, 50, .12);
+  border-color: rgba(242, 182, 50, .35);
+  color: var(--gold2);
+}
+
+.contact-action-btn.call:hover {
+  background: rgba(242, 182, 50, .2);
+  border-color: rgba(242, 182, 50, .6);
+}
+
 @media (max-width: 640px) {
   .contact-grid {
     grid-template-columns: 1fr;
+  }
+  .contact-actions {
+    flex-direction: column;
+  }
+  .contact-action-btn {
+    width: 100%;
+    justify-content: center;
   }
 }

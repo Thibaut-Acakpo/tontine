@@ -165,28 +165,41 @@ export function Home() {
 
         <Reveal>
           <div className="contact-grid">
+            {/* Case 1 : Email */}
             <a className="contact-card" href="mailto:acakpothibaut2@gmail.com">
-              <div className="contact-icon">📧</div>
+              <div className="contact-icon">
+                <Icons.Mail size={32} strokeWidth={1.8} />
+              </div>
               <div className="contact-label">{t('contact.email')}</div>
               <div className="contact-value">acakpothibaut2@gmail.com</div>
             </a>
 
-            <a
-              className="contact-card"
-              href="https://wa.me/2290199911438?text=Bonjour%2C%20je%20souhaite%20g%C3%A9rer%20mes%20tontines%20avec%20Tontine."
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <div className="contact-icon">💬</div>
-              <div className="contact-label">{t('contact.whatsapp')}</div>
+            {/* Case 2 : WhatsApp + Appel */}
+            <div className="contact-card contact-card-phone">
+              <div className="contact-icon">
+                <Icons.PhoneCall size={32} strokeWidth={1.8} />
+              </div>
+              <div className="contact-label">
+                {t('contact.whatsapp')} &amp; {t('contact.call')}
+              </div>
               <div className="contact-value">+229 01 99 91 14 38</div>
-            </a>
 
-            <a className="contact-card" href="tel:+2290199911438">
-              <div className="contact-icon">📞</div>
-              <div className="contact-label">{t('contact.call')}</div>
-              <div className="contact-value">+229 01 99 91 14 38</div>
-            </a>
+              <div className="contact-actions">
+                <a
+                  className="contact-action-btn wa"
+                  href="https://wa.me/2290199911438?text=Bonjour%2C%20je%20souhaite%20g%C3%A9rer%20mes%20tontines%20avec%20Tontine."
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Icons.WhatsApp size={16} strokeWidth={2} />
+                  WhatsApp
+                </a>
+                <a className="contact-action-btn call" href="tel:+2290199911438">
+                  <Icons.PhoneCall size={16} strokeWidth={2} />
+                  {t('contact.call')}
+                </a>
+              </div>
+            </div>
           </div>
 
           <p className="mut sm" style={{ textAlign: 'center', marginTop: '1.5rem' }}>
