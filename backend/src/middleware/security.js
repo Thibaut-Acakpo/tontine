@@ -34,9 +34,19 @@ const corsMiddleware = cors({
 });
 
 // HTTPS obligatoire en production.
+// ⚠️ Derrière un reverse proxy (Render, Heroku...), req.secure ne suffit pas :
+// il faut se fier à X-Forwarded-Proto (injecté par Cloudflare/Render).
 function enforceHttps(req, res, next) {
-  if (!config.isProd || req.secure) return next();
-  if (req.method === 'GET' || req.method === 'HEAD') return res.redirect(301, `https://${req.headers.host}${req.originalUrl}`);
+  if (!config.isProd) return next();
+
+  const forwardedProto = (req.get('x-forwarded-proto') || '').split(',')[0].trim();
+  const isHttps = req.secure || forwardedProto === 'https';
+
+  if (isHttps) return next();
+
+  if (req.method === 'GET' || req.method === 'HEAD') {
+    return res.redirect(301, `https://${req.headers.host}${req.originalUrl}`);
+  }
   return next(E.forbidden('HTTPS requis'));
 }
 
