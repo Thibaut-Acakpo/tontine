@@ -17,10 +17,6 @@ function createApp() {
   app.use(securityHeaders);
   app.use(corsMiddleware);
 
-  // ✅ Webhook Kkiapay : DOIT être AVANT express.json() pour préserver la signature
-  // et AVANT requireAuth pour être accessible sans session utilisateur.
-  app.use('/api/kkiapay', express.json({ limit: '50kb' }), require('./routes/kkiapay-webhook'));
-
   // Webhooks génériques : corps brut + signature, avant le parseur JSON global.
   app.use('/api/webhooks', limiters.webhook, require('./routes/webhooks'));
 

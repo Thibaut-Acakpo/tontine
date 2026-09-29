@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { api, money, fdate, qs } from '../api.js';
 import { Tilt } from '../components/Fx.jsx';
-import { Badge, Empty, Msg, Pager, useAction, label, SkeletonCard, ConfirmModal, toast } from '../components/ui.jsx';
+import { Badge, Empty, Msg, Pager, useAction, SkeletonCard, ConfirmModal, toast } from '../components/ui.jsx';
 import { Icons } from '../components/Icons.jsx';
 
 export default function Tontines() {
@@ -45,8 +45,7 @@ export default function Tontines() {
     setConfirmDelete(null);
     const r = await del.run(() => api(`/tontines/${tontine.id}`, { method: 'DELETE' }));
     if (r) {
-      toast('Tontine supprimée', 'success');
-      // Rafraîchir
+      toast(t('admin.userDeleted'), 'success');
       setRes(null);
       api(`/tontines${qs({ page, limit: 12, status: status || undefined })}`).then(setRes).catch(() => {});
     }
@@ -55,11 +54,10 @@ export default function Tontines() {
   const loading = res === null;
   const data = res?.data || [];
 
-  // Préparer les données du graphique
   const chartData = data.slice(0, 6).map((tontine) => ({
     name: tontine.name.length > 12 ? tontine.name.slice(0, 12) + '…' : tontine.name,
-    collecté: Number(tontine.collected || 0),
-    versé: Number(tontine.paidOut || 0),
+    [t('dashboard.chart.collected')]: Number(tontine.collected || 0),
+    [t('dashboard.chart.paid')]: Number(tontine.paidOut || 0),
   }));
 
   return (
@@ -69,8 +67,8 @@ export default function Tontines() {
           <h1 style={{ marginBottom: '.3rem' }}>{t('tontines.title')}</h1>
           <p className="mut" style={{ margin: 0 }}>
             {loading ? t('common.loading')
-              : data.length === 0 ? 'Aucune tontine pour le moment'
-              : `${data.length} tontine${data.length > 1 ? 's' : ''} affichée${data.length > 1 ? 's' : ''}`}
+              : data.length === 0 ? t('tontines.none')
+              : t('tontines.count', { count: data.length })}
           </p>
         </div>
         <button className="btn" onClick={() => setOpen(!open)}>
@@ -80,19 +78,19 @@ export default function Tontines() {
 
       {open && (
         <form className="card mt" onSubmit={create}>
-          <h3>Créer une nouvelle tontine</h3>
+          <h3>{t('tontines.createTitle')}</h3>
           <div className="grid g2">
             <div>
-              <label>Nom de la tontine *</label>
-              <input required value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} placeholder="Ex: Tontine des amis" />
+              <label>{t('tontines.name')} *</label>
+              <input required value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} placeholder={t('tontines.namePlaceholder')} />
             </div>
             <div>
-              <label>Montant de la cotisation (FCFA) *</label>
+              <label>{t('tontines.contributionAmount')} *</label>
               <input required type="number" min="100" step="100" value={f.contributionAmount}
                 onChange={(e) => setF({ ...f, contributionAmount: e.target.value })} />
             </div>
             <div>
-              <label>Fréquence *</label>
+              <label>{t('tontines.frequency')} *</label>
               <select value={f.frequency} onChange={(e) => setF({ ...f, frequency: e.target.value })}>
                 {['weekly', 'biweekly', 'monthly'].map((x) => (
                   <option key={x} value={x}>{t(`freq.${x}`)}</option>
@@ -100,23 +98,23 @@ export default function Tontines() {
               </select>
             </div>
             <div>
-              <label>Date du premier tour *</label>
+              <label>{t('tontines.startDate')} *</label>
               <input required type="date" value={f.startDate}
                 onChange={(e) => setF({ ...f, startDate: e.target.value })} />
             </div>
           </div>
-          <label>Description (facultatif)</label>
+          <label>{t('tontines.description')} ({t('common.optional')})</label>
           <textarea
             maxLength={500}
             value={f.description}
             onChange={(e) => setF({ ...f, description: e.target.value })}
-            placeholder="Décrivez le but de la tontine, ses règles, etc."
+            placeholder={t('tontines.descriptionPlaceholder')}
             rows={3}
           />
           <Msg>{a.error}</Msg>
           <div className="row between mt" style={{ gap: '.6rem' }}>
             <button type="button" className="btn ghost" onClick={() => setOpen(false)}>{t('common.cancel')}</button>
-            <button className="btn" disabled={a.busy}>{a.busy ? '…' : 'Créer la tontine'}</button>
+            <button className="btn" disabled={a.busy}>{a.busy ? '…' : t('tontines.createBtn')}</button>
           </div>
         </form>
       )}
@@ -136,11 +134,11 @@ export default function Tontines() {
         ))}
       </div>
 
-      {/* Graphique comparatif */}
+      {/* Graphique */}
       {!loading && chartData.length > 0 && (
         <div className="card mt">
-          <h3>Aperçu financier</h3>
-          <p className="mut sm">Montants collectés vs versés par tontine</p>
+          <h3>{t('dashboard.financialOverview')}</h3>
+          <p className="mut sm">{t('dashboard.financialOverviewDesc')}</p>
           <div style={{ width: '100%', height: 240, marginTop: '1rem' }}>
             <ResponsiveContainer>
               <BarChart data={chartData}>
@@ -156,8 +154,8 @@ export default function Tontines() {
                   }}
                   formatter={(v) => Number(v).toLocaleString('fr-FR') + ' FCFA'}
                 />
-                <Bar dataKey="collecté" fill="#2ecc8f" radius={[6, 6, 0, 0]} />
-                <Bar dataKey="versé" fill="#f2b632" radius={[6, 6, 0, 0]} />
+                <Bar dataKey={t('dashboard.chart.collected')} fill="#2ecc8f" radius={[6, 6, 0, 0]} />
+                <Bar dataKey={t('dashboard.chart.paid')} fill="#f2b632" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -176,7 +174,7 @@ export default function Tontines() {
           <div className="card" style={{ gridColumn: '1 / -1' }}>
             <Empty>
               {status
-                ? <>Aucune tontine avec ce statut.</>
+                ? <>{t('tontines.emptyFilter')}</>
                 : <>{t('tontines.empty')}<br />
                   <button className="btn mt" onClick={() => setOpen(true)}>{t('tontines.createFirst')}</button></>}
             </Empty>
@@ -195,7 +193,7 @@ export default function Tontines() {
                     <button
                       className="btn ghost sm"
                       onClick={() => setConfirmDelete(tontine)}
-                      title={t('tontines.deleteBtn')}
+                      title={t('common.delete')}
                       style={{ color: 'var(--red)' }}
                     >
                       <Icons.Delete size={14} />
@@ -210,12 +208,14 @@ export default function Tontines() {
                   {money(tontine.contributionAmount, tontine.currency)} · {t(`freq.${tontine.frequency}`)}
                 </p>
                 <p className="mut sm" style={{ margin: 0 }}>
-                  {tontine.memberCount} membre{tontine.memberCount > 1 ? 's' : ''} · début {fdate(tontine.startDate)}
+                  {tontine.memberCount} {tontine.memberCount > 1 ? t('tontines.members_plural') : t('tontines.members')} · {t('tontines.start')} {fdate(tontine.startDate)}
                 </p>
                 {tontine.roundsTotal > 0 && (
                   <>
                     <div className="progress mt"><i style={{ width: `${pct}%` }} /></div>
-                    <small className="mut">{tontine.roundsDone}/{tontine.roundsTotal} tours versés</small>
+                    <small className="mut">
+                      {t('tontines.roundsDone', { done: tontine.roundsDone, total: tontine.roundsTotal })}
+                    </small>
                   </>
                 )}
               </Tilt>
@@ -226,11 +226,10 @@ export default function Tontines() {
 
       {!loading && <Pager meta={res?.meta} onPage={setPage} />}
 
-      {/* Modal de confirmation suppression */}
       <ConfirmModal
         open={!!confirmDelete}
-        title="Supprimer la tontine ?"
-        message={confirmDelete ? `« ${confirmDelete.name} » sera définitivement supprimée. Cette action est irréversible.` : ''}
+        title={t('tontines.deleteConfirmTitle')}
+        message={confirmDelete ? t('tontines.deleteConfirmDesc', { name: confirmDelete.name }) : ''}
         confirmText={t('common.delete')}
         cancelText={t('common.cancel')}
         danger

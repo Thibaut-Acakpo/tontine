@@ -1,26 +1,28 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export const Msg = ({ kind = 'err', children }) => (children ? <div className={`msg ${kind}`} role={kind === 'err' ? 'alert' : 'status'}>{children}</div> : null);
 
-const LABELS = {
-  draft: 'Brouillon', active: 'Active', completed: 'Terminée', archived: 'Archivée',
-  pending: 'En attente', paid: 'Payée', validated: 'Validée', failed: 'Échouée',
-  reversed: 'Annulée', open: 'Ouvert', paid_out: 'Versé',
-  contribution: 'Cotisation', payout: 'Versement', reversal: 'Annulation',
-  cash: 'Espèces', mobile_money: 'Mobile money',
-  manager: 'Gestionnaire', treasurer: 'Trésorier', member: 'Membre', admin: 'Administrateur',
-  weekly: 'Hebdomadaire', biweekly: 'Bimensuelle', monthly: 'Mensuelle',
+// ✅ Badge traduit via i18n
+export const Badge = ({ v }) => {
+  const { t } = useTranslation();
+  const translated = t(`status.${v}`);
+  const display = translated.startsWith('status.') ? v : translated;
+  return <span className={`badge b-${v}`}>{display}</span>;
 };
-export const label = (k) => LABELS[k] || k;
-export const Badge = ({ v }) => <span className={`badge b-${v}`}>{label(v)}</span>;
 
 export function Pager({ meta, onPage }) {
+  const { t } = useTranslation();
   if (!meta || meta.pages <= 1) return null;
   return (
     <div className="pager">
-      <button className="btn ghost" disabled={meta.page <= 1} onClick={() => onPage(meta.page - 1)}>← Précédent</button>
-      <span>Page {meta.page} / {meta.pages}</span>
-      <button className="btn ghost" disabled={meta.page >= meta.pages} onClick={() => onPage(meta.page + 1)}>Suivant →</button>
+      <button className="btn ghost" disabled={meta.page <= 1} onClick={() => onPage(meta.page - 1)}>
+        {t('common.previous')}
+      </button>
+      <span>{t('common.page')} {meta.page} / {meta.pages}</span>
+      <button className="btn ghost" disabled={meta.page >= meta.pages} onClick={() => onPage(meta.page + 1)}>
+        {t('common.next')}
+      </button>
     </div>
   );
 }
@@ -174,7 +176,7 @@ export function ToastContainer() {
           <button
             className="toast-close"
             onClick={() => setToasts((prev) => prev.filter((x) => x.id !== t.id))}
-            aria-label="Fermer"
+            aria-label="Close"
           >
             ✕
           </button>

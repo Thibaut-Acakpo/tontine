@@ -18,7 +18,6 @@ export default function Dashboard() {
   useEffect(() => {
     api('/tontines?limit=50').then((r) => {
       setTontines(r.data);
-      // Préparer les données du graphique (6 dernières tontines actives)
       const active = r.data.filter((x) => x.status === 'active').slice(0, 6);
       setChartData(active.map((x) => ({
         name: x.name.length > 8 ? x.name.slice(0, 8) + '…' : x.name,
@@ -43,10 +42,10 @@ export default function Dashboard() {
             {t('dashboard.hello', { name: user.fullName.split(' ')[0] })}
           </h1>
           <p className="mut" style={{ margin: 0 }}>
-            {loading ? t('common.loading')
+            {loading ? t('dashboard.loading')
               : active.length === 0 ? t('dashboard.noActive')
-              : due?.length === 0 ? t('dashboard.noPending')
-              : `Vous avez ${due.length} cotisation${due.length > 1 ? 's' : ''} en attente.`}
+              : due?.length === 0 ? t('dashboard.allUpToDate')
+              : t('dashboard.pendingCount', { count: due?.length ?? 0 })}
           </p>
         </div>
       </div>
@@ -80,8 +79,8 @@ export default function Dashboard() {
       {/* Graphique financier */}
       {!loading && chartData.length > 0 && (
         <div className="card mt">
-          <h3>Aperçu financier</h3>
-          <p className="mut sm">Montants collectés vs versés sur les tontines actives</p>
+          <h3>{t('dashboard.financialOverview')}</h3>
+          <p className="mut sm">{t('dashboard.financialOverviewDesc')}</p>
           <div style={{ width: '100%', height: 260, marginTop: '1rem' }}>
             <ResponsiveContainer>
               <AreaChart data={chartData}>
@@ -131,15 +130,19 @@ export default function Dashboard() {
               {due.slice(0, 5).map((c) => (
                 <Link key={c.id} to={`/app/tontines/${c.tontineId}`} className="dash-item">
                   <div className="dash-item-main">
-                    <div className="dash-item-title">{c.tontineName} · tour {c.roundNumber}</div>
-                    <div className="dash-item-sub">échéance {fdate(c.dueDate)}</div>
+                    <div className="dash-item-title">
+                      {c.tontineName} · {t('dashboard.tour', { number: c.roundNumber })}
+                    </div>
+                    <div className="dash-item-sub">
+                      {t('dashboard.dueDate', { date: fdate(c.dueDate) })}
+                    </div>
                   </div>
                   <b className="dash-item-amount">{money(c.amountDue, c.currency)}</b>
                 </Link>
               ))}
               {due.length > 5 && (
                 <Link to="/app/paiements" className="sm mut" style={{ display: 'block', textAlign: 'center', padding: '.5rem' }}>
-                  +{due.length - 5} autres
+                  {t('dashboard.others', { count: due.length - 5 })}
                 </Link>
               )}
             </div>
@@ -184,7 +187,7 @@ export default function Dashboard() {
           </>
         ) : active.length === 0 ? (
           <div className="card" style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '2.5rem 1rem' }}>
-            <p className="mut" style={{ marginBottom: '1rem' }}>{t('dashboard.noActive')}</p>
+            <p className="mut" style={{ marginBottom: '1rem' }}>{t('dashboard.noActiveTontines')}</p>
             <Link to="/app/tontines" className="btn">{t('dashboard.createFirst')}</Link>
           </div>
         ) : (
@@ -195,10 +198,14 @@ export default function Dashboard() {
                 <Link to={`/app/tontines/${x.id}`}><h3>{x.name}</h3></Link>
                 <div className="row">
                   <Badge v={x.status} />
-                  <span className="mut sm">{money(x.contributionAmount, x.currency)} · {x.memberCount} membres</span>
+                  <span className="mut sm">
+                    {money(x.contributionAmount, x.currency)} · {x.memberCount} {t('tontines.members')}
+                  </span>
                 </div>
                 <div className="progress mt"><i style={{ width: `${pct}%` }} /></div>
-                <small className="mut">{x.roundsDone}/{x.roundsTotal} tours versés</small>
+                <small className="mut">
+                  {t('tontines.roundsDone', { done: x.roundsDone, total: x.roundsTotal })}
+                </small>
               </Tilt>
             );
           })

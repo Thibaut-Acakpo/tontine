@@ -35,7 +35,7 @@ export default function Layout() {
   const { user, logout } = useAuth();
   const nav = useNavigate();
   const loc = useLocation();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { theme, toggle: toggleTheme } = useTheme();
   const [unread, setUnread] = useState(0);
   const [confirmLogout, setConfirmLogout] = useState(false);
@@ -71,6 +71,11 @@ export default function Layout() {
     setConfirmLogout(false);
     await logout();
     nav('/');
+  };
+
+  const changeLanguage = (lang) => {
+    i18n.changeLanguage(lang);
+    localStorage.setItem('lang', lang);
   };
 
   return (
@@ -130,11 +135,26 @@ export default function Layout() {
           {user.role === 'admin' && link('/app/admin', t('menu.admin'), Icons.Admin)}
         </nav>
 
+        <div className="spacer" />
+
         <div className="side-bottom">
+          {/* Toggle thème (desktop) */}
           <button className="side-theme-toggle" onClick={toggleTheme}>
             {theme === 'dark' ? <Icons.Sun size={16} /> : <Icons.Moon size={16} />}
             <span>{theme === 'dark' ? 'Mode clair' : 'Mode sombre'}</span>
           </button>
+
+          {/* ✅ Sélecteur de langue */}
+          <select
+            className="side-lang-select"
+            value={i18n.language}
+            onChange={(e) => changeLanguage(e.target.value)}
+            aria-label="Changer de langue"
+          >
+            <option value="fr">🇫🇷 Français</option>
+            <option value="en">🇬🇧 English</option>
+          </select>
+
           <Link to="/" className="nav nav-external" target="_blank" rel="noopener noreferrer">
             <span className="nav-icon"><Icons.External size={16} /></span>
             <span className="nav-label">{t('menu.seeSite')}</span>

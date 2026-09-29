@@ -1,5 +1,5 @@
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 import { api, money, fdate, fdatetime } from '../api.js';
 
 export async function exportTontinePDF(tontine, tontineId) {
@@ -14,6 +14,7 @@ export async function exportTontinePDF(tontine, tontineId) {
 
     const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
     const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
 
     // En-tête
     doc.setFontSize(22);
@@ -48,7 +49,8 @@ export async function exportTontinePDF(tontine, tontineId) {
     doc.text('Tours', 15, y);
     y += 4;
 
-    doc.autoTable({
+    // ✅ CORRECTION : utiliser autoTable(doc, {...}) au lieu de doc.autoTable({...})
+    autoTable(doc, {
       startY: y,
       head: [['#', 'Bénéficiaire', 'Échéance', 'Payé/Total', 'Collecté', 'Statut']],
       body: rounds.map((r) => [
@@ -64,6 +66,7 @@ export async function exportTontinePDF(tontine, tontineId) {
       styles: { fontSize: 9 },
     });
 
+    // Récupérer la position finale du tableau
     y = doc.lastAutoTable.finalY + 10;
 
     // Section Transactions
@@ -73,7 +76,7 @@ export async function exportTontinePDF(tontine, tontineId) {
     doc.text('Historique des transactions', 15, y);
     y += 4;
 
-    doc.autoTable({
+    autoTable(doc, {
       startY: y,
       head: [['N°', 'Date', 'Type', 'Membre', 'Montant', 'Statut']],
       body: transactions.slice(0, 100).map((x) => [
@@ -98,7 +101,7 @@ export async function exportTontinePDF(tontine, tontineId) {
       doc.text(
         `Page ${i}/${pageCount} — Tontine © ${new Date().getFullYear()}`,
         pageWidth / 2,
-        doc.internal.pageSize.getHeight() - 8,
+        pageHeight - 8,
         { align: 'center' }
       );
     }
@@ -106,6 +109,7 @@ export async function exportTontinePDF(tontine, tontineId) {
     // Télécharger
     doc.save(`tontine-${tontineData.name.replace(/\s+/g, '-')}-${Date.now()}.pdf`);
   } catch (e) {
+    console.error('PDF error:', e);
     alert('Erreur lors de la génération du PDF : ' + e.message);
   }
 }

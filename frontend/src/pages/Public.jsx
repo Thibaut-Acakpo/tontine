@@ -1,31 +1,35 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { api } from '../api.js';
 import { useAuth } from '../auth.jsx';
 import { Coin3D, Reveal, Tilt } from '../components/Fx.jsx';
 import { Msg, useAction } from '../components/ui.jsx';
+import { Icons } from '../components/Icons.jsx';
 
 // ============================================================
 // NAVIGATION PUBLIQUE
 // ============================================================
 export function PublicNav() {
   const { user } = useAuth();
+  const { t } = useTranslation();
   return (
     <nav className="pubnav">
       <Link to="/" className="brand"><i>₣</i> Tontine</Link>
       <div className="row">
         {user
-          ? <Link className="btn" to="/app">Mon espace</Link>
-          : <Link className="btn" to="/connexion">Connexion</Link>}
+          ? <Link className="btn" to="/app">{t('auth.mySpace')}</Link>
+          : <Link className="btn" to="/connexion">{t('auth.login')}</Link>}
       </div>
     </nav>
   );
 }
 
 // ============================================================
-// PAGE D'ACCUEIL — Refonte complète
+// PAGE D'ACCUEIL
 // ============================================================
 export function Home() {
+  const { t } = useTranslation();
   return (
     <div className="pub">
       <PublicNav />
@@ -34,16 +38,13 @@ export function Home() {
       <section className="hero">
         <div>
           <h1>
-            Votre tontine,<br />
-            <span className="gold">transparente</span> et sécurisée.
+            {t('home.heroTitle')}<br />
+            <span className="gold">{t('home.heroHighlight')}</span> {t('home.heroEnd')}
           </h1>
-          <p>
-            Organisez les tours, suivez chaque cotisation et versez les bénéficiaires
-            en toute confiance. Fini les cahiers et les malentendus.
-          </p>
+          <p>{t('home.heroDesc')}</p>
           <div className="row mt" style={{ gap: '.6rem' }}>
-            <Link className="btn" to="/connexion">Accéder à mon espace</Link>
-            <a className="btn ghost" href="#how-it-works">Comment ça marche ?</a>
+            <Link className="btn" to="/connexion">{t('home.accessSpace')}</Link>
+            <a className="btn ghost" href="#how-it-works">{t('home.howItWorks')}</a>
           </div>
         </div>
         <Coin3D />
@@ -52,10 +53,10 @@ export function Home() {
       {/* 2. CHIFFRES CLÉS */}
       <section className="landing-stats">
         {[
-          ['100%', 'Sécurisé', 'Chiffrement des données & 2FA'],
-          ['0', 'Cahier papier', 'Tout est digital et traçable'],
-          ['24/7', 'Accessible', 'Sur mobile, tablette et ordinateur'],
-          ['∞', 'Tontines', 'Créez-en autant que vous voulez'],
+          ['100%', t('home.stat1.label'), t('home.stat1.desc')],
+          ['0', t('home.stat2.label'), t('home.stat2.desc')],
+          ['24/7', t('home.stat3.label'), t('home.stat3.desc')],
+          ['∞', t('home.stat4.label'), t('home.stat4.desc')],
         ].map(([v, l, d], i) => (
           <Reveal key={l} delay={i * 80}>
             <div className="landing-stat">
@@ -70,23 +71,23 @@ export function Home() {
       {/* 3. FONCTIONNALITÉS */}
       <section className="landing-section">
         <div className="landing-head">
-          <h2>Tout ce qu'il faut pour gérer vos tontines</h2>
-          <p className="mut">
-            Des outils simples et puissants pour remplacer le cahier papier et éviter les erreurs.
-          </p>
+          <h2>{t('home.featuresTitle')}</h2>
+          <p className="mut">{t('home.featuresDesc')}</p>
         </div>
         <div className="features">
           {[
-            { icon: '📊', title: 'Cotisations claires', desc: 'Montants, fréquence et ordre des bénéficiaires définis une fois pour toutes. Plus de calculs à refaire.' },
-            { icon: '🔒', title: 'Livre de comptes inviolable', desc: 'Chaque opération a un numéro unique. Toute correction est tracée. Impossible de falsifier.' },
-            { icon: '💳', title: 'Paiements sécurisés', desc: 'Montants vérifiés côté serveur, protection contre les doubles paiements. Mobile money et espèces.' },
-            { icon: '👥', title: 'Rôles maîtrisés', desc: 'Administrateur, gestionnaire, trésorier, membre : chacun ses droits et ses responsabilités.' },
-            { icon: '🔔', title: 'Notifications automatiques', desc: 'Rappels d\'échéance, confirmations de paiement, versements. Tout le monde est prévenu.' },
-            { icon: '📱', title: 'Accessible partout', desc: 'Sur mobile, tablette et ordinateur. Fonctionne même avec une connexion lente.' },
-          ].map(({ icon, title, desc }, i) => (
+            { Icon: Icons.Trending,      title: t('home.feat1.title'), desc: t('home.feat1.desc') },
+            { Icon: Icons.Lock,          title: t('home.feat2.title'), desc: t('home.feat2.desc') },
+            { Icon: Icons.Payments,      title: t('home.feat3.title'), desc: t('home.feat3.desc') },
+            { Icon: Icons.Users,         title: t('home.feat4.title'), desc: t('home.feat4.desc') },
+            { Icon: Icons.Notifications, title: t('home.feat5.title'), desc: t('home.feat5.desc') },
+            { Icon: Icons.Phone,         title: t('home.feat6.title'), desc: t('home.feat6.desc') },
+          ].map(({ Icon, title, desc }, i) => (
             <Reveal key={title} delay={i * 60}>
               <Tilt>
-                <div className="feature-icon">{icon}</div>
+                <div className="feature-icon">
+                  <Icon size={26} strokeWidth={1.8} />
+                </div>
                 <h3>{title}</h3>
                 <p className="mut">{desc}</p>
               </Tilt>
@@ -98,15 +99,15 @@ export function Home() {
       {/* 4. COMMENT ÇA MARCHE */}
       <section className="landing-section" id="how-it-works">
         <div className="landing-head">
-          <h2>Comment ça marche ?</h2>
-          <p className="mut">4 étapes simples pour digitaliser votre tontine.</p>
+          <h2>{t('home.howTitle')}</h2>
+          <p className="mut">{t('home.howDesc')}</p>
         </div>
         <div className="steps-grid">
           {[
-            { n: '1', title: 'Créez votre tontine', desc: 'Définissez le montant, la fréquence et la date de début. En 30 secondes.' },
-            { n: '2', title: 'Invitez vos membres', desc: 'Ajoutez les participants par email. Ils reçoivent une invitation automatique.' },
-            { n: '3', title: 'Suivez les cotisations', desc: 'Chaque membre paie en ligne ou en espèces. Tout est enregistré automatiquement.' },
-            { n: '4', title: 'Versez les bénéficiaires', desc: 'À chaque tour, versez la cagnotte au bénéficiaire désigné. C\'est tracé.' },
+            { n: '1', title: t('home.step1.title'), desc: t('home.step1.desc') },
+            { n: '2', title: t('home.step2.title'), desc: t('home.step2.desc') },
+            { n: '3', title: t('home.step3.title'), desc: t('home.step3.desc') },
+            { n: '4', title: t('home.step4.title'), desc: t('home.step4.desc') },
           ].map(({ n, title, desc }, i) => (
             <Reveal key={n} delay={i * 80}>
               <div className="step-card">
@@ -123,13 +124,10 @@ export function Home() {
       <section className="landing-cta">
         <Reveal>
           <div className="cta-card">
-            <h2>Prêt à digitaliser votre tontine ?</h2>
-            <p className="mut">
-              Connectez-vous pour créer votre première tontine, ou demandez à votre gestionnaire
-              de vous ajouter à une tontine existante.
-            </p>
+            <h2>{t('home.ctaTitle')}</h2>
+            <p className="mut">{t('home.ctaDesc')}</p>
             <div className="row" style={{ justifyContent: 'center', gap: '.6rem', marginTop: '1.5rem' }}>
-              <Link className="btn" to="/connexion">Accéder à mon espace</Link>
+              <Link className="btn" to="/connexion">{t('home.accessSpace')}</Link>
             </div>
           </div>
         </Reveal>
@@ -140,33 +138,31 @@ export function Home() {
         <div className="footer-grid">
           <div>
             <div className="brand" style={{ marginBottom: '.8rem' }}><i>₣</i> Tontine</div>
-            <p className="mut sm" style={{ maxWidth: 320 }}>
-              La plateforme qui digitalise les tontines pour plus de transparence et de confiance.
-            </p>
+            <p className="mut sm" style={{ maxWidth: 320 }}>{t('home.footerTagline')}</p>
           </div>
           <div>
-            <h4>Navigation</h4>
+            <h4>{t('home.footerNav')}</h4>
             <ul>
-              <li><a href="#how-it-works">Comment ça marche</a></li>
-              <li><Link to="/connexion">Connexion</Link></li>
+              <li><a href="#how-it-works">{t('home.howItWorks')}</a></li>
+              <li><Link to="/connexion">{t('auth.login')}</Link></li>
             </ul>
           </div>
           <div>
-            <h4>Légal</h4>
+            <h4>{t('home.footerLegal')}</h4>
             <ul>
-              <li><Link to="/confidentialite">Confidentialité</Link></li>
-              <li><Link to="/cgu">CGU</Link></li>
+              <li><Link to="/confidentialite">{t('home.footerPrivacy')}</Link></li>
+              <li><Link to="/cgu">{t('home.footerTerms')}</Link></li>
             </ul>
           </div>
           <div>
-            <h4>Contact</h4>
+            <h4>{t('home.footerContact')}</h4>
             <ul>
               <li><a href="mailto:contact@tontine.app">contact@tontine.app</a></li>
             </ul>
           </div>
         </div>
         <div className="footer-bottom">
-          <span className="mut sm">© {new Date().getFullYear()} Tontine · Tous droits réservés.</span>
+          <span className="mut sm">© {new Date().getFullYear()} Tontine · {t('home.footerRights')}</span>
         </div>
       </footer>
     </div>
@@ -174,7 +170,7 @@ export function Home() {
 }
 
 // ============================================================
-// Shell public
+// Shell
 // ============================================================
 const Shell = ({ title, children }) => (
   <div className="pub">
@@ -189,25 +185,22 @@ const Shell = ({ title, children }) => (
 );
 
 // ============================================================
-// ✅ INSCRIPTION PAR TOKEN (sécurisée)
+// INSCRIPTION PAR TOKEN
 // ============================================================
 export function Register() {
+  const { t } = useTranslation();
   const [p] = useSearchParams();
   const token = p.get('token');
   const [f, setF] = useState({ fullName: '', email: '', phone: '', password: '' });
   const [done, setDone] = useState(false);
   const a = useAction();
 
-  // ❌ Si pas de token → afficher un message
   if (!token) {
     return (
-      <Shell title="Invitation requise">
-        <Msg kind="err">
-          L'inscription est réservée aux personnes invitées par un gestionnaire de tontine.
-          Si vous avez reçu un lien d'invitation, cliquez dessus depuis votre email.
-        </Msg>
+      <Shell title={t('auth.invitationRequired')}>
+        <Msg kind="err">{t('auth.invitationRequiredDesc')}</Msg>
         <p className="mut sm mt">
-          Vous avez déjà un compte ? <Link to="/connexion">Se connecter</Link>
+          {t('auth.alreadyRegistered')} <Link to="/connexion">{t('auth.loginBtn')}</Link>
         </p>
       </Shell>
     );
@@ -225,35 +218,34 @@ export function Register() {
 
   if (done) {
     return (
-      <Shell title="Compte créé ✅">
-        <Msg kind="ok">
-          Votre compte a été créé et vous avez été rattaché à la tontine.
-          Vous pouvez maintenant vous connecter.
-        </Msg>
-        <Link className="btn mt" to="/connexion">Se connecter</Link>
+      <Shell title={t('auth.accountCreated')}>
+        <Msg kind="ok">{t('auth.accountCreatedDesc')}</Msg>
+        <Link className="btn mt" to="/connexion">{t('auth.loginBtn')}</Link>
       </Shell>
     );
   }
 
   return (
-    <Shell title="Créer mon compte">
+    <Shell title={t('auth.createMyAccount')}>
       <p className="mut sm" style={{ marginTop: '-.3rem', marginBottom: '1rem' }}>
-        Vous avez été invité à rejoindre une tontine. Créez votre compte pour y accéder.
+        {t('auth.invitedDesc')}
       </p>
       <form onSubmit={submit}>
-        <label>Nom complet *</label>
+        <label>{t('auth.fullName')} *</label>
         <input required value={f.fullName} onChange={set('fullName')} autoComplete="name" />
-        <label>Email *</label>
+        <label>{t('auth.email')} *</label>
         <input required type="email" value={f.email} onChange={set('email')} autoComplete="email"
-          placeholder="Utilisez l'email qui a reçu l'invitation" />
-        <label>Téléphone (facultatif)</label>
-        <input value={f.phone} onChange={set('phone')} autoComplete="tel" placeholder="+229 ..." />
-        <label>Mot de passe * (10 caractères min.)</label>
+          placeholder={t('auth.emailPlaceholder')} />
+        <label>{t('auth.phone')} ({t('common.optional')})</label>
+        <input value={f.phone} onChange={set('phone')} autoComplete="tel" placeholder={t('auth.phonePlaceholder')} />
+        <label>{t('auth.password')} * ({t('auth.passwordHint')})</label>
         <input required type="password" minLength={10} value={f.password} onChange={set('password')} autoComplete="new-password" />
         <Msg>{a.error}</Msg>
-        <button className="btn mt" disabled={a.busy}>{a.busy ? '…' : 'Créer mon compte'}</button>
+        <button className="btn mt" disabled={a.busy}>{a.busy ? '…' : t('auth.createMyAccount')}</button>
       </form>
-      <p className="mut sm mt">Déjà inscrit ? <Link to="/connexion">Se connecter</Link></p>
+      <p className="mut sm mt">
+        {t('auth.alreadyRegistered')} <Link to="/connexion">{t('auth.loginBtn')}</Link>
+      </p>
     </Shell>
   );
 }
@@ -262,6 +254,7 @@ export function Register() {
 // CONNEXION
 // ============================================================
 export function Login() {
+  const { t } = useTranslation();
   const { login } = useAuth();
   const nav = useNavigate();
   const a = useAction();
@@ -280,13 +273,16 @@ export function Login() {
     });
   };
   return (
-    <Shell title="Connexion">
+    <Shell title={t('auth.login')}>
       <form onSubmit={submit}>
-        <label>Email</label><input required type="email" value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} autoComplete="email" />
-        <label>Mot de passe</label><input required type="password" value={f.password} onChange={(e) => setF({ ...f, password: e.target.value })} autoComplete="current-password" />
-        <Msg>{a.error}</Msg><button className="btn mt" disabled={a.busy}>{a.busy ? '…' : 'Se connecter'}</button>
+        <label>{t('auth.email')}</label>
+        <input required type="email" value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} autoComplete="email" />
+        <label>{t('auth.password')}</label>
+        <input required type="password" value={f.password} onChange={(e) => setF({ ...f, password: e.target.value })} autoComplete="current-password" />
+        <Msg>{a.error}</Msg>
+        <button className="btn mt" disabled={a.busy}>{a.busy ? '…' : t('auth.loginBtn')}</button>
       </form>
-      <p className="mut sm mt"><Link to="/mot-de-passe-oublie">Mot de passe oublié ?</Link></p>
+      <p className="mut sm mt"><Link to="/mot-de-passe-oublie">{t('auth.forgotPassword')}</Link></p>
     </Shell>
   );
 }
@@ -295,22 +291,36 @@ export function Login() {
 // MOT DE PASSE OUBLIÉ
 // ============================================================
 export function Forgot() {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const a = useAction();
   return (
-    <Shell title="Mot de passe oublié">
-      <form onSubmit={(e) => { e.preventDefault(); a.run(() => api('/auth/forgot-password', { method: 'POST', body: { email } }), 'Si l\'adresse est valide, un email vous a été envoyé.'); }}>
-        <label>Email</label><input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-        <Msg>{a.error}</Msg><Msg kind="ok">{a.info}</Msg><button className="btn mt" disabled={a.busy}>Envoyer le lien</button>
+    <Shell title={t('auth.forgotPasswordTitle')}>
+      <p className="mut sm" style={{ marginTop: '-.3rem', marginBottom: '1rem' }}>
+        {t('auth.forgotPasswordDesc')}
+      </p>
+      <form onSubmit={(e) => {
+        e.preventDefault();
+        a.run(
+          () => api('/auth/forgot-password', { method: 'POST', body: { email } }),
+          t('auth.forgotSuccess')
+        );
+      }}>
+        <label>{t('auth.email')}</label>
+        <input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+        <Msg>{a.error}</Msg>
+        <Msg kind="ok">{a.info}</Msg>
+        <button className="btn mt" disabled={a.busy}>{t('auth.sendLink')}</button>
       </form>
     </Shell>
   );
 }
 
 // ============================================================
-// RÉINITIALISATION MOT DE PASSE
+// RÉINITIALISATION
 // ============================================================
 export function Reset() {
+  const { t } = useTranslation();
   const [p] = useSearchParams();
   const [password, setPw] = useState('');
   const [confirm, setConfirm] = useState('');
@@ -320,22 +330,22 @@ export function Reset() {
   const token = p.get('token') || '';
 
   const rules = [
-    { k: 'len', ok: password.length >= 10, label: 'Au moins 10 caractères' },
-    { k: 'up', ok: /[A-Z]/.test(password), label: 'Une majuscule' },
-    { k: 'low', ok: /[a-z]/.test(password), label: 'Une minuscule' },
-    { k: 'num', ok: /[0-9]/.test(password), label: 'Un chiffre' },
+    { k: 'len', ok: password.length >= 10, label: t('reset.rule.length') },
+    { k: 'up', ok: /[A-Z]/.test(password), label: t('reset.rule.upper') },
+    { k: 'low', ok: /[a-z]/.test(password), label: t('reset.rule.lower') },
+    { k: 'num', ok: /[0-9]/.test(password), label: t('reset.rule.number') },
   ];
   const passed = rules.filter((r) => r.ok).length;
-  const strength = ['', 'Faible', 'Moyen', 'Bon', 'Fort'][passed];
-  const strengthClass = ['', 'red', 'gold', 'em', 'em'][passed];
+  const strength = [t('reset.strength.weak'), t('reset.strength.weak'), t('reset.strength.medium'), t('reset.strength.good'), t('reset.strength.strong')][passed];
+  const strengthClass = ['', 'red', 'red', 'gold', 'em'][passed];
   const match = password && confirm && password === confirm;
   const canSubmit = passed === 4 && match && !a.busy;
 
   if (!token) {
     return (
-      <Shell title="Lien invalide">
-        <Msg kind="err">Le lien est incomplet ou invalide. Refaites une demande de réinitialisation.</Msg>
-        <Link className="btn mt" to="/mot-de-passe-oublie">Recommencer</Link>
+      <Shell title={t('auth.invalidLink')}>
+        <Msg kind="err">{t('auth.invalidLinkDesc')}</Msg>
+        <Link className="btn mt" to="/mot-de-passe-oublie">{t('auth.restart')}</Link>
       </Shell>
     );
   }
@@ -343,22 +353,23 @@ export function Reset() {
   const submit = async (e) => {
     e.preventDefault();
     if (!canSubmit) return;
-    if (await a.run(() => api('/auth/reset-password', { method: 'POST', body: { token, password } }), 'Mot de passe modifié.')) {
+    if (await a.run(() => api('/auth/reset-password', { method: 'POST', body: { token, password } }), t('settings.passwordChanged'))) {
       setTimeout(() => nav('/connexion'), 1500);
     }
   };
 
   return (
-    <Shell title="Nouveau mot de passe">
+    <Shell title={t('auth.resetPasswordTitle')}>
       <p className="mut sm" style={{ marginTop: '-.3rem', marginBottom: '1rem' }}>
-        Choisissez un mot de passe sécurisé. Après validation, vous serez redirigé vers la page de connexion.
+        {t('auth.resetPasswordDesc')}
       </p>
 
       <form onSubmit={submit}>
-        <label>Nouveau mot de passe</label>
+        <label>{t('auth.newPassword')}</label>
         <div className="pw-wrap">
-          <input required type={show ? 'text' : 'password'} value={password} onChange={(e) => setPw(e.target.value)} autoComplete="new-password" autoFocus />
-          <button type="button" className="pw-toggle" onClick={() => setShow(!show)} aria-label={show ? 'Masquer' : 'Afficher'}>
+          <input required type={show ? 'text' : 'password'} value={password}
+            onChange={(e) => setPw(e.target.value)} autoComplete="new-password" autoFocus />
+          <button type="button" className="pw-toggle" onClick={() => setShow(!show)}>
             {show ? '🙈' : '👁'}
           </button>
         </div>
@@ -382,18 +393,19 @@ export function Reset() {
           </ul>
         )}
 
-        <label>Confirmer le mot de passe</label>
+        <label>{t('auth.confirmPassword')}</label>
         <div className="pw-wrap">
-          <input required type={show ? 'text' : 'password'} value={confirm} onChange={(e) => setConfirm(e.target.value)} autoComplete="new-password" />
+          <input required type={show ? 'text' : 'password'} value={confirm}
+            onChange={(e) => setConfirm(e.target.value)} autoComplete="new-password" />
         </div>
-        {confirm && !match && <p className="sm pw-mismatch">Les deux mots de passe ne correspondent pas.</p>}
-        {confirm && match && <p className="sm pw-match">✓ Les mots de passe correspondent</p>}
+        {confirm && !match && <p className="sm pw-mismatch">{t('auth.passwordMismatch')}</p>}
+        {confirm && match && <p className="sm pw-match">{t('auth.passwordMatch')}</p>}
 
         <Msg>{a.error}</Msg>
         <Msg kind="ok">{a.info}</Msg>
 
         <button className="btn mt" disabled={!canSubmit}>
-          {a.busy ? 'Enregistrement…' : 'Enregistrer le nouveau mot de passe'}
+          {a.busy ? t('auth.saving') : t('auth.savePassword')}
         </button>
       </form>
     </Shell>
@@ -404,17 +416,18 @@ export function Reset() {
 // VÉRIFICATION EMAIL
 // ============================================================
 export function VerifyEmail() {
+  const { t } = useTranslation();
   const [p] = useSearchParams();
-  const [state, setState] = useState({ msg: 'Vérification en cours…', ok: null });
+  const [state, setState] = useState({ msg: t('auth.verifying'), ok: null });
   useEffect(() => {
     api('/auth/verify-email', { method: 'POST', body: { token: p.get('token') || '' } })
-      .then(() => setState({ msg: 'Adresse confirmée, vous pouvez vous connecter.', ok: true }))
+      .then(() => setState({ msg: t('auth.emailConfirmed'), ok: true }))
       .catch((e) => setState({ msg: e.message, ok: false }));
-  }, [p]);
+  }, [p, t]);
   return (
-    <Shell title="Confirmation de l'email">
+    <Shell title={t('auth.emailVerified')}>
       <Msg kind={state.ok === false ? 'err' : 'ok'}>{state.msg}</Msg>
-      {state.ok && <Link className="btn" to="/connexion">Se connecter</Link>}
+      {state.ok && <Link className="btn" to="/connexion">{t('auth.loginBtn')}</Link>}
     </Shell>
   );
 }
@@ -423,6 +436,7 @@ export function VerifyEmail() {
 // VÉRIFICATION PIN
 // ============================================================
 export function VerifyPin() {
+  const { t } = useTranslation();
   const [pin, setPin] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
@@ -454,9 +468,9 @@ export function VerifyPin() {
   };
 
   return (
-    <Shell title="Code PIN">
+    <Shell title={t('auth.pinTitle')}>
       <p className="mut sm" style={{ marginTop: '-.3rem', marginBottom: '1rem' }}>
-        Saisissez votre code PIN à 4 chiffres pour accéder à votre espace.
+        {t('auth.pinDesc')}
       </p>
 
       <form onSubmit={handleSubmit}>
@@ -483,11 +497,11 @@ export function VerifyPin() {
           />
         </div>
 
-        {busy && <p className="mut sm" style={{ textAlign: 'center' }}>Vérification…</p>}
+        {busy && <p className="mut sm" style={{ textAlign: 'center' }}>{t('auth.verifying')}</p>}
         <Msg>{error}</Msg>
 
         <p className="mut sm mt" style={{ textAlign: 'center' }}>
-          <Link to="/connexion">Utiliser un autre compte</Link>
+          <Link to="/connexion">{t('auth.otherAccount')}</Link>
         </p>
       </form>
     </Shell>
@@ -498,6 +512,7 @@ export function VerifyPin() {
 // VÉRIFICATION 2FA
 // ============================================================
 export function Verify2FA() {
+  const { t } = useTranslation();
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
@@ -527,15 +542,13 @@ export function Verify2FA() {
   };
 
   return (
-    <Shell title="Vérification 2FA">
+    <Shell title={t('auth.2faTitle')}>
       <p className="mut sm" style={{ marginTop: '-.3rem', marginBottom: '1rem' }}>
-        {useBackup
-          ? "Entrez un code de secours (format XXXX-XXXX). Chaque code ne peut être utilisé qu'une fois."
-          : "Ouvrez votre application d'authentification et entrez le code à 6 chiffres."}
+        {useBackup ? t('auth.2faBackupDesc') : t('auth.2faDesc')}
       </p>
 
       <form onSubmit={submit}>
-        <label>{useBackup ? 'Code de secours' : 'Code 2FA'}</label>
+        <label>{useBackup ? t('auth.backupCode') : t('auth.2faCode')}</label>
         <input
           type="text"
           inputMode={useBackup ? 'text' : 'numeric'}
@@ -551,17 +564,17 @@ export function Verify2FA() {
         <Msg>{error}</Msg>
 
         <button className="btn mt" disabled={busy || !code} style={{ width: '100%' }}>
-          {busy ? 'Vérification…' : 'Valider'}
+          {busy ? t('auth.verifying') : t('auth.validate')}
         </button>
 
         <p className="mut sm mt" style={{ textAlign: 'center' }}>
           <button type="button" className="btn ghost sm" onClick={() => { setUseBackup(!useBackup); setCode(''); setError(''); }}>
-            {useBackup ? '← Utiliser un code 2FA' : 'Utiliser un code de secours'}
+            {useBackup ? t('auth.use2fa') : t('auth.useBackup')}
           </button>
         </p>
 
         <p className="mut sm mt" style={{ textAlign: 'center' }}>
-          <Link to="/connexion">Utiliser un autre compte</Link>
+          <Link to="/connexion">{t('auth.otherAccount')}</Link>
         </p>
       </form>
     </Shell>

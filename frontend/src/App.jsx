@@ -6,7 +6,7 @@ import { Privacy, Terms } from './pages/Legal.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import Tontines from './pages/Tontines.jsx';
 import TontineDetail from './pages/TontineDetail.jsx';
-import { Payments, MockPay, Notifications, Profile, Settings, Admin } from './pages/Account.jsx';
+import { Payments, Notifications, Profile, Settings, Admin } from './pages/Account.jsx';
 
 function Private({ children, admin }) {
   const { user, loading } = useAuth(); const loc = useLocation();
@@ -32,7 +32,6 @@ export default function App() {
       <Route path="/2fa" element={<Verify2FA />} />
       <Route path="/pin" element={<Private><VerifyPin /></Private>} />
 
-      <Route path="/paiement-simule/:reference" element={<Private><MockPay /></Private>} />
       <Route path="/app" element={<Private><Layout /></Private>}>
         <Route index element={<Dashboard />} />
         <Route path="tontines" element={<Tontines />} />

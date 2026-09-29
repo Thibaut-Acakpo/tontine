@@ -3,6 +3,7 @@ const express = require('express');
 const db = require('../db');
 const { validate, z, s } = require('../middleware/validate');
 const { asyncHandler, ok, E, camel, pageParams, pageMeta } = require('../utils/http');
+const { audit } = require('../audit');
 
 const router = express.Router();
 
@@ -24,6 +25,21 @@ router.post('/:id/read', validate({ params: z.object({ id: s.id }) }), asyncHand
   const r = await db.query('UPDATE notifications SET read_at = COALESCE(read_at, UTC_TIMESTAMP()) WHERE id = ? AND user_id = ?', [req.params.id, req.user.id]);
   if (!r.affectedRows) throw E.notFound();
   ok(res, { message: 'Notification lue' });
+}));
+
+// ✅ NOUVEAU : Supprimer une notification
+router.delete('/:id', validate({ params: z.object({ id: s.id }) }), asyncHandler(async (req, res) => {
+  const r = await db.query('DELETE FROM notifications WHERE id = ? AND user_id = ?', [req.params.id, req.user.id]);
+  if (!r.affectedRows) throw E.notFound();
+  await audit(req, { action: 'notification.delete', resourceType: 'notification', resourceId: req.params.id });
+  ok(res, { message: 'Notification supprimée' });
+}));
+
+// ✅ NOUVEAU : Supprimer toutes les notifications
+router.delete('/', asyncHandler(async (req, res) => {
+  const r = await db.query('DELETE FROM notifications WHERE user_id = ?', [req.user.id]);
+  await audit(req, { action: 'notification.delete_all', resourceType: 'notification', meta: { count: r.affectedRows } });
+  ok(res, { message: `${r.affectedRows} notification(s) supprimée(s)` });
 }));
 
 module.exports = router;

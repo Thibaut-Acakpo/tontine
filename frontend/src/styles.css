@@ -653,7 +653,7 @@ tbody tr:hover { background: rgba(255, 255, 255, .04); }
   border-radius: 14px;
   background: linear-gradient(135deg, rgba(242, 182, 50, .18), rgba(242, 182, 50, .05));
   border: 1px solid rgba(242, 182, 50, .25);
-  font-size: 1.6rem;
+  color: var(--gold2);  /* ← Ajouter : couleur des icônes */
   margin-bottom: .8rem;
 }
 
@@ -1821,4 +1821,47 @@ select { max-width: 100%; }
   .toast { max-width: none; }
 }
 
+/* ============================================================
+   ✅ SÉLECTEUR DE LANGUE
+   ============================================================ */
 
+.side-lang-select {
+  width: 100%;
+  padding: .5rem .7rem;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--txt);
+  font: inherit;
+  font-size: .85rem;
+  cursor: pointer;
+  margin-top: .3rem;
+  transition: background .15s, border-color .15s;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239db8a9' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right .6rem center;
+  padding-right: 2rem;
+}
+
+.side-lang-select:hover {
+  background-color: var(--card);
+  border-color: var(--gold);
+}
+
+.side-lang-select:focus {
+  outline: 0;
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(242, 182, 50, .15);
+}
+
+.side-lang-select option {
+  background: var(--bg2);
+  color: var(--txt);
+}
+
+@media (max-width: 860px) {
+  .side-lang-select {
+    display: none;
+  }
+}
