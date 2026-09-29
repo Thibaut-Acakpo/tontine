@@ -1,117 +1,248 @@
-# Plateforme de gestion de tontine
+# 🪙 Tontine — Plateforme de gestion de tontines
 
-Application web complète réalisée d'après le *Cahier des charges technique et de sécurité* :
+> Application web moderne pour digitaliser les tontines : transparence, traçabilité et sécurité.
 
-- **Frontend** : React + Vite (pièce 3D, fond de pièces animé, cartes inclinables, apparitions au défilement)
-- **Backend** : Node.js + Express, API REST sécurisée (`/api/auth`, `users`, `tontines`, `members`, `contributions`, `payments`, `transactions`, `notifications`, `admin`, `webhooks`)
-- **Base de données** : MySQL 8 ou MariaDB (XAMPP / WAMP conviennent), requêtes préparées, transactions SQL
-- **Tests de sécurité automatisés** : 15 scénarios (auth, CSRF, accès entre tontines, injection SQL, double paiement concurrent, webhooks, uploads, CORS, en-têtes)
+![Version](https://img.shields.io/badge/version-1.0.0-blue)
+![Node](https://img.shields.io/badge/node-%3E%3D20-brightgreen)
+![License](https://img.shields.io/badge/license-MIT-green)
 
-```
-tontine-platform/
-├── backend/     API, schéma SQL (sql/), scripts (migration, admin, sauvegarde), tests
-├── frontend/    Interface React
-├── SECURITE.md  Correspondance point par point avec le cahier des charges
-```
+---
 
-## Installation pas à pas (Windows / PowerShell)
+## 📖 Description
 
-Chaque étape se termine par une **vérification** : ne passez à la suivante que si elle est validée.
+**Tontine** est une plateforme complète pour gérer les tontines (systèmes d'épargne collective rotative). Elle remplace le cahier papier traditionnel par une solution digitale sécurisée.
 
-### 0. Prérequis
-Installez **Node.js 20+** (nodejs.org) et **MySQL ou MariaDB** (par exemple XAMPP : démarrez « MySQL »).
+### ✨ Fonctionnalités principales
 
-Vérification :
-```powershell
-node -v          # v20 ou plus
-mysql --version  # ou C:\xampp\mysql\bin\mysql.exe --version
-```
+| Fonctionnalité | Description |
+|----------------|-------------|
+| 🔐 **Authentification complète** | Mot de passe, code PIN, 2FA (Google Authenticator) |
+| 👥 **Gestion multi-rôles** | Admin, gestionnaire, trésorier, membre |
+| 💰 **Gestion des tontines** | Création, membres, tours, ordre des bénéficiaires |
+| 💳 **Paiements** | Enregistrement en espèces, versements aux bénéficiaires |
+| 📧 **Notifications** | Email (Gmail SMTP), push (OneSignal) |
+| 🌍 **Multilingue** | Français / Anglais |
+| 🌓 **Thème** | Sombre / Clair |
+| 📊 **Statistiques** | Tableau de bord, graphiques, export PDF |
+| 📱 **PWA** | Installable sur mobile |
+| 🔔 **Rappels automatiques** | Cron quotidien pour les échéances |
 
-### 1. Créer la base et le compte à privilèges limités
-Ouvrez `backend\sql\db-user.sql`, remplacez `CHANGEZ_MOI...` par un mot de passe long, puis :
-```powershell
-mysql -u root -p < backend\sql\db-user.sql
-```
-Vérification : `mysql -u tontine_app -p -e "SHOW DATABASES;"` affiche `tontine`.
+---
 
-### 2. Configurer le backend
-```powershell
+## 🛠️ Stack technique
+
+### Frontend
+- **React 19** + Vite
+- **React Router** (navigation)
+- **React-i18next** (multilingue)
+- **Recharts** (graphiques)
+- **jsPDF + AutoTable** (export PDF)
+- **Lucide React** (icônes)
+- **PWA** (vite-plugin-pwa)
+
+### Backend
+- **Node.js 20+** + Express
+- **MariaDB / MySQL** (mysql2)
+- **argon2** (hash mots de passe)
+- **otplib** (2FA TOTP)
+- **nodemailer** (SMTP)
+- **@emailjs/nodejs** (fallback emails)
+- **node-cron** (tâches planifiées)
+- **nodemon** (dev)
+
+---
+
+## 📁 Structure du projet
+tontine/
+├── backend/ # API REST Node.js
+│ ├── src/
+│ │ ├── middleware/ # Auth, sécurité, validation
+│ │ ├── routes/ # Routes API
+│ │ ├── services/ # Logique métier
+│ │ ├── utils/ # Utilitaires
+│ │ ├── app.js # Configuration Express
+│ │ ├── server.js # Point d'entrée
+│ │ ├── config.js # Configuration
+│ │ ├── db.js # Connexion MySQL
+│ │ └── mailer.js # Envoi d'emails
+│ ├── scripts/ # Scripts (migrations, backup, seed)
+│ ├── sql/ # Fichiers SQL
+│ ├── .env.example # Variables d'environnement (modèle)
+│ └── package.json
+│
+├── frontend/ # Interface React
+│ ├── src/
+│ │ ├── components/ # Composants réutilisables
+│ │ ├── pages/ # Pages de l'app
+│ │ ├── utils/ # Utilitaires (PDF...)
+│ │ ├── App.jsx # Routes
+│ │ ├── main.jsx # Point d'entrée
+│ │ ├── api.js # Client API
+│ │ ├── auth.jsx # Contexte auth
+│ │ ├── i18n.js # Traductions
+│ │ └── styles.css # Styles globaux
+│ ├── public/ # Assets statiques
+│ └── package.json
+│
+└── README.md
+
+text
+
+---
+
+## 🚀 Installation
+
+### Prérequis
+
+- **Node.js** ≥ 20
+- **MariaDB** ou **MySQL** ≥ 8
+- **npm** ou **yarn**
+
+### 1. Cloner le projet
+
+```bash
+git clone https://github.com/Thibaut-Acakpo/tontine.git
+cd tontine
+2. Backend
+bash
 cd backend
-Copy-Item .env.example .env
-notepad .env
-```
-À renseigner : `DB_PASSWORD` (étape 1), `DB_ADMIN_USER` / `DB_ADMIN_PASSWORD` (compte root, utilisé **uniquement** par la migration), et deux secrets aléatoires pour `WEBHOOK_SECRET` et `BACKUP_ENCRYPTION_KEY` :
-```powershell
-node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
-```
-`.env` est dans `.gitignore` : ne le partagez jamais.
-
-### 3. Installer, migrer, créer l'administrateur
-```powershell
 npm install
+
+# Copier et configurer les variables
+cp .env.example .env
+# Éditez .env avec vos identifiants
+Variables importantes à configurer dans .env :
+
+env
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_NAME=tontine
+DB_USER=votre_user
+DB_PASSWORD=votre_password
+
+# Admin (créé au premier seed)
+ADMIN_EMAIL=admin@example.com
+ADMIN_PASSWORD=change_me
+
+# Email (Gmail SMTP recommandé)
+GMAIL_USER=your@gmail.com
+GMAIL_APP_PASSWORD=xxxx xxxx xxxx xxxx
+Créer la base de données :
+
+bash
+# Créer la base dans MySQL
+mysql -u root -e "CREATE DATABASE tontine CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+
+# Lancer les migrations
 npm run migrate
-$env:ADMIN_EMAIL="vous@exemple.com"; $env:ADMIN_PASSWORD="UnMotDePasseLong123"; npm run seed
-```
-Vérification : « Migration terminée : 16 blocs exécutés » puis « Administrateur prêt ».
 
-### 4. Lancer les tests de sécurité (recommandé)
-Les tests utilisent une base **séparée**, à créer une fois (adaptez les mots de passe) :
-```sql
-CREATE DATABASE tontine_test CHARACTER SET utf8mb4;
-CREATE USER 'tt_admin'@'%' IDENTIFIED BY 'adminpw'; GRANT ALL ON tontine_test.* TO 'tt_admin'@'%';
-CREATE USER 'tt_app'@'%'   IDENTIFIED BY 'apppw';   GRANT SELECT,INSERT,UPDATE,DELETE ON tontine_test.* TO 'tt_app'@'%';
-```
-```powershell
-npm test
-```
-Vérification : `# pass 15` et `# fail 0`. (Autres identifiants : variables `TEST_DB_HOST`, `TEST_DB_NAME`, `TEST_DB_USER`, `TEST_DB_PASSWORD`, `TEST_DB_ADMIN_USER`, `TEST_DB_ADMIN_PASSWORD`.)
+# Créer l'admin
+npm run seed
 
-### 5. Démarrer l'API
-```powershell
+# Démarrer en dev
 npm run dev
-```
-Vérification : http://localhost:3001/api/health répond `{"success":true,"data":{"status":"ok"}}`.
+Backend accessible sur http://localhost:3001.
 
-### 6. Démarrer le frontend (nouveau terminal)
-```powershell
-cd frontend
+3. Frontend
+bash
+cd ../frontend
 npm install
 npm run dev
-```
-Ouvrez http://localhost:5173 — la page d'accueil s'affiche avec la pièce 3D.
+Frontend accessible sur http://localhost:5173.
 
-### 7. Parcours de test complet
-1. Connectez-vous avec l'administrateur et créez une tontine (« Mes tontines → Nouvelle tontine »).
-2. Créez 2 autres comptes via **Créer un compte**. En développement (sans SMTP), les emails sont écrits dans `backend\logs\mail-outbox.log` : copiez le lien de confirmation.
-3. Dans la tontine, onglet **Membres** : ajoutez-les par email, ordonnez, **Démarrer**.
-4. Onglet **Cotisations** : « Espèces » (trésorier) ou « Payer en ligne » (paiement simulé). Quand un tour est complet : onglet **Tours → Verser**.
-5. Onglet **Historique** : numéros de transaction, justificatifs, annulation tracée.
-6. Compte admin : **Administration** (utilisateurs, journal d'audit).
+📜 Scripts disponibles
+Backend
+Script	Description
+npm start	Démarrer en production
+npm run dev	Démarrer en dev (nodemon)
+npm run migrate	Appliquer les migrations
+npm run seed	Créer l'admin
+npm run backup	Sauvegarder la base
+npm run restore	Restaurer une sauvegarde
+npm test	Lancer les tests
+Frontend
+Script	Description
+npm run dev	Démarrer Vite en dev
+npm run build	Build de production
+npm run preview	Prévisualiser le build
+🔐 Sécurité
+✅ Mots de passe hashés avec argon2id
 
-## Rôles
+✅ Sessions avec cookies HttpOnly + CSRF tokens
 
-| Niveau | Rôle | Droits |
-|---|---|---|
-| Plateforme | Administrateur | Gère les utilisateurs, lit le journal d'audit, accède à toutes les tontines |
-| Par tontine | Gestionnaire | Membres, ordre, démarrage, archivage, encaissements, versements, annulations |
-| Par tontine | Trésorier | Encaissements, versements, annulations |
-| Par tontine | Membre | Voit ses propres cotisations et transactions, paie en ligne |
+✅ 2FA disponible pour tous les comptes
 
-## Paiements
+✅ Code PIN à 4 chiffres (verrouillage après 3 échecs)
 
-- `PAYMENT_PROVIDER=none` : espèces uniquement (le trésorier enregistre les encaissements).
-- `PAYMENT_PROVIDER=mock` : simulateur de développement (**refusé en production**).
-- Vrai opérateur (FedaPay, KKiaPay, CinetPay, MTN MoMo…) : ajoutez un objet respectant l'interface décrite en tête de `backend/src/services/providers.js` (`createCheckout`, `verify`, `verifySignature`). Webhook signé, anti-doublon et vérification serveur du montant sont déjà en place. **L'adaptateur lui-même n'est pas fourni** : il dépend de votre compte marchand.
+✅ Rate limiting sur les endpoints sensibles
 
-## Mise en production
+✅ Verrouillage après 5 tentatives échouées
 
-1. Serveur derrière **HTTPS** (nginx, Caddy, hébergeur) ; `NODE_ENV=production`, `TRUST_PROXY=1`, `APP_URL` et `CORS_ORIGINS` en `https://`.
-2. `SMTP_*` configurés, `WEBHOOK_SECRET` ≥ 32 caractères, `DB_USER` ≠ root : le serveur **refuse de démarrer** sinon.
-3. Frontend : `cd frontend && npm run build`, puis `SERVE_FRONTEND=1` (l'API sert `frontend/dist` avec une CSP stricte), ou hébergement statique séparé.
-4. Sauvegardes : `npm run backup` (mysqldump → gzip → AES-256-GCM, rotation `BACKUP_KEEP`). Planification Windows :
-   ```powershell
-   schtasks /Create /SC DAILY /ST 02:00 /TN "TontineBackup" /TR "cmd /c cd /d C:\chemin\backend && npm run backup"
-   ```
-   Copiez `backups/` vers un stockage **séparé** du serveur et **testez la restauration** : `node scripts/restore.js backups\xxx.enc restore.sql`, puis chargez `restore.sql` dans une base vide.
-5. `npm run audit` (backend et frontend) avant chaque déploiement.
-6. Parcourez la checklist du cahier des charges avec `SECURITE.md`.
+✅ Journal d'audit de toutes les actions
+
+✅ CORS configuré strictement
+
+✅ Helmet pour les headers HTTP
+
+📱 Installation PWA
+Android (Chrome)
+Ouvrir l'app dans Chrome
+
+Menu → "Ajouter à l'écran d'accueil"
+
+iOS (Safari)
+Ouvrir l'app dans Safari
+
+Bouton Partager → "Sur l'écran d'accueil"
+
+🌍 Déploiement
+Recommandé
+Service	Rôle	Coût
+Render	Backend Node.js	Gratuit
+Vercel	Frontend React	Gratuit
+Railway	Base MySQL	Gratuit
+UptimeRobot	Anti cold-start	Gratuit
+Étapes rapides
+Base de données sur Railway → importer un dump
+
+Backend sur Render → connecter le repo GitHub + variables .env
+
+Frontend sur Vercel → connecter + VITE_API_URL=https://xxx.onrender.com
+
+Anti cold-start : UptimeRobot sur /api/health
+
+📸 Captures d'écran
+À ajouter : captures du Dashboard, Tontines, Paiements, Admin
+
+🤝 Contribution
+Les contributions sont les bienvenues !
+
+Fork le projet
+
+Créer une branche (git checkout -b feature/ma-feature)
+
+Commit (git commit -m 'Ajout de ma feature')
+
+Push (git push origin feature/ma-feature)
+
+Ouvrir une Pull Request
+
+👤 Auteur
+ACAKPO Thibaut
+
+GitHub : @Thibaut-Acakpo
+
+Email : acakpothibaut2@gmail.com
+
+🙏 Remerciements
+React
+
+Vite
+
+Express
+
+Lucide Icons
+
+Recharts
+
+<div align="center"> <sub>Fait avec ❤️ pour digitaliser les tontines</sub> </div>
