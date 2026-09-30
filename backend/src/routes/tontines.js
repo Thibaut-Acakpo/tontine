@@ -65,8 +65,8 @@ router.get('/', validate({ query: z.object({ ...s.page, status: z.enum(['draft',
               (SELECT COALESCE(SUM(amount), 0) FROM transactions WHERE tontine_id = t.id AND type = 'contribution' AND status = 'validated') AS collected,
               (SELECT COALESCE(SUM(amount), 0) FROM transactions WHERE tontine_id = t.id AND type = 'payout' AND status = 'validated') AS paid_out
          ${from} ${whereClause}
-         ORDER BY t.created_at DESC LIMIT ? OFFSET ?`,
-      [...fromParams, ...whereParams, p.limit, p.offset]
+         ORDER BY t.created_at DESC LIMIT ${p.limit} OFFSET ${p.offset}`,
+[...fromParams, ...whereParams]
     );
 
     ok(res, camel(rows), pageMeta(p, total.n));

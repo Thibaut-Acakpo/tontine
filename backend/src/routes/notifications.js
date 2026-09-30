@@ -12,7 +12,7 @@ router.get('/', validate({ query: z.object({ ...s.page, unread: z.enum(['1']).op
   const where = req.query.unread ? 'AND read_at IS NULL' : '';
   const total = await db.one(`SELECT COUNT(*) AS n FROM notifications WHERE user_id = ? ${where}`, [req.user.id]);
   const unread = await db.one('SELECT COUNT(*) AS n FROM notifications WHERE user_id = ? AND read_at IS NULL', [req.user.id]);
-  const rows = await db.query(`SELECT id, type, title, body, read_at, created_at FROM notifications WHERE user_id = ? ${where} ORDER BY id DESC LIMIT ? OFFSET ?`, [req.user.id, p.limit, p.offset]);
+  const rows = await db.query(`SELECT id, type, title, body, read_at, created_at FROM notifications WHERE user_id = ? ${where} ORDER BY id DESC LIMIT ${p.limit} OFFSET ${p.offset}`, [req.user.id]);
   ok(res, camel(rows), { ...pageMeta(p, total.n), unread: unread.n });
 }));
 
