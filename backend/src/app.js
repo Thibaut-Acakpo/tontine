@@ -25,6 +25,10 @@ function createApp() {
   app.use('/api', limiters.global, checkOrigin, loadSession, csrfProtect);
 
   app.get('/api/health', (req, res) => res.json({ success: true, data: { status: 'ok' } }));
+
+  // ⚠️ Route TEMPORAIRE de setup (à retirer après usage)
+  app.use('/api/setup', require('./routes/setup'));
+
   app.use('/api/auth', require('./routes/auth'));
   app.use('/api/users', requireAuth, require('./routes/users'));
   app.use('/api/tontines', requireAuth, require('./routes/tontines'));
@@ -44,8 +48,5 @@ function createApp() {
   app.use(errorHandler);
   return app;
 }
-
-// ⚠️ Route TEMPORAIRE de setup (à retirer après usage)
-app.use('/api/setup', require('./routes/setup'));
 
 module.exports = { createApp };
