@@ -29,7 +29,7 @@ router.get('/', validate({ query: z.object({ ...s.page, tontineId: s.id, type: z
     if (req.query.status) { where.push('t.status = ?'); params.push(req.query.status); }
     const w = where.join(' AND ');
     const total = await db.one(`SELECT COUNT(*) AS n ${FROM} WHERE ${w}`, params);
-    const rows = await db.query(`SELECT ${COLS} ${FROM} WHERE ${w} ORDER BY t.id DESC LIMIT ? OFFSET ?`, [...params, String(p.limit), String(p.offset)]);
+    const rows = await db.query(`SELECT ${COLS} ${FROM} WHERE ${w} ORDER BY t.id DESC LIMIT ? OFFSET ?`, [...params, p.limit, p.offset]);
     ok(res, camel(rows), pageMeta(p, total.n));
   }));
 

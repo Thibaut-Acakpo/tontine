@@ -102,7 +102,7 @@ router.get('/', validate({ query: z.object({ ...s.page, tontineId: s.id, roundId
     const rows = await db.query(
       `SELECT c.id, c.round_id, r.round_number, r.due_date, c.member_id, m.display_name AS member_name, c.amount_due, c.status, c.paid_at, (m.user_id = ?) AS is_mine
          FROM contributions c JOIN tontine_members m ON m.id = c.member_id JOIN rounds r ON r.id = c.round_id
-        WHERE ${w} ORDER BY r.round_number, m.position LIMIT ? OFFSET ?`, [req.user.id, ...params, String(p.limit), String(p.offset)]);
+        WHERE ${w} ORDER BY r.round_number, m.position LIMIT ? OFFSET ?`, [req.user.id, ...params, p.limit, p.offset]);
     ok(res, camel(rows.map((r) => ({ ...r, is_mine: !!r.is_mine }))), pageMeta(p, total.n));
   }));
 

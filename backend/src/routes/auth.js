@@ -533,7 +533,7 @@ router.get('/login-history', requireAuth, validate({ query: z.object({ ...s.page
   const total = await db.one('SELECT COUNT(*) AS n FROM login_history WHERE user_id = ?', [req.user.id]);
   const rows = await db.query(
     'SELECT id, ip, user_agent, result, reason, created_at FROM login_history WHERE user_id = ? ORDER BY id DESC LIMIT ? OFFSET ?',
-    [req.user.id, String(p.limit), String(p.offset)]
+    [req.user.id, p.limit, p.offset]
   );
   ok(res, camel(rows), pageMeta(p, total.n));
 }));

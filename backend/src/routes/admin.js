@@ -29,7 +29,7 @@ router.get('/users', validate({ query: z.object({ ...s.page, q: z.string().trim(
   const p = pageParams(req.query);
   const like = req.query.q ? `%${req.query.q.replace(/[%_\\]/g, '\\$&')}%` : '%';
   const total = await db.one('SELECT COUNT(*) AS n FROM users WHERE email LIKE ? OR full_name LIKE ?', [like, like]);
-  const rows = await db.query('SELECT id, email, full_name, role, status, email_verified_at, created_at FROM users WHERE email LIKE ? OR full_name LIKE ? ORDER BY id DESC LIMIT ? OFFSET ?', [like, like, String(p.limit), String(p.offset)]);
+  const rows = await db.query('SELECT id, email, full_name, role, status, email_verified_at, created_at FROM users WHERE email LIKE ? OR full_name LIKE ? ORDER BY id DESC LIMIT ? OFFSET ?', [like, like, p.limit, p.offset]);
   ok(res, camel(rows), pageMeta(p, total.n));
 }));
 
@@ -180,7 +180,7 @@ router.get('/audit-logs', validate({ query: z.object({ ...s.page, action: z.stri
   if (req.query.result) { where.push('result = ?'); params.push(req.query.result); }
   const w = where.join(' AND ');
   const total = await db.one(`SELECT COUNT(*) AS n FROM audit_logs WHERE ${w}`, params);
-  const rows = await db.query(`SELECT id, user_id, action, resource_type, resource_id, result, ip, created_at FROM audit_logs WHERE ${w} ORDER BY id DESC LIMIT ? OFFSET ?`, [...params, String(p.limit), String(p.offset)]);
+  const rows = await db.query(`SELECT id, user_id, action, resource_type, resource_id, result, ip, created_at FROM audit_logs WHERE ${w} ORDER BY id DESC LIMIT ? OFFSET ?`, [...params, p.limit, p.offset]);
   ok(res, camel(rows), pageMeta(p, total.n));
 }));
 
