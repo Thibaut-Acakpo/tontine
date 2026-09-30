@@ -2,7 +2,7 @@
 // Aucune clé secrète dans le frontend.
 
 // ✅ URL de l'API : en dev utilise le proxy Vite (vide), en prod utilise la variable d'environnement Vercel
-const API_URL = import.meta.env.VITE_API_URL || '';
+const API_URL = '';  // Utilise TOUJOURS le chemin relatif /api (proxy via Vercel)
 
 let csrfToken = null;
 export const setCsrf = (t) => { csrfToken = t; };
