@@ -3,6 +3,15 @@
 const mysql = require('mysql2/promise');
 const config = require('./config');
 
+// ✅ SSL obligatoire pour TiDB Cloud (et autres MySQL managés).
+// En local (WAMP, MySQL local), on désactive SSL pour ne pas casser le dev.
+const sslOptions = config.isProd
+  ? {
+      minVersion: 'TLSv1.2',
+      rejectUnauthorized: false,  // TiDB Cloud utilise un certificat valide, on peut accepter sans CA locale
+    }
+  : undefined;
+
 const baseOptions = {
   host: String(config.db.host || '127.0.0.1').trim(),
   port: Number(config.db.port || 3306),
@@ -17,7 +26,10 @@ const baseOptions = {
   supportBigNumbers: true,
   bigNumberStrings: false,
 
-  charset: 'utf8mb4'
+  charset: 'utf8mb4',
+
+  // ✅ NOUVEAU : activation SSL en production
+  ...(sslOptions ? { ssl: sslOptions } : {}),
 };
 
 let pool = null;
