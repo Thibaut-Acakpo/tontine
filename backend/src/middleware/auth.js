@@ -58,7 +58,14 @@ function csrfProtect(req, res, next) {
 }
 
 function sessionCookieOptions() {
-  return { httpOnly: true, secure: config.isProd, sameSite: config.session.sameSite, path: '/', maxAge: config.session.ttlMs };
+  return {
+    httpOnly: true,
+    secure: config.isProd,
+    sameSite: config.session.sameSite,
+    path: '/',
+    maxAge: config.session.ttlMs,
+    // ⚠️ PAS de `domain` → le navigateur utilise le domaine du backend automatiquement
+  };
 }
 
 module.exports = { loadSession, requireAuth, requireAdmin, csrfProtect, sessionCookieOptions };

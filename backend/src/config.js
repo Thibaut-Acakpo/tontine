@@ -29,7 +29,7 @@ const config = {
     adminPassword: env.DB_ADMIN_PASSWORD ?? env.DB_PASSWORD ?? '',
   },
   session: {
-    cookieName: isProd ? '__Host-sid' : 'sid',
+    cookieName: 'sid',  // Fonctionne en local ET en prod (cross-domain Vercel↔Render)
     ttlMs: int(env.SESSION_TTL_HOURS, 12) * 3600 * 1000,
     idleMs: int(env.SESSION_IDLE_MINUTES, 60) * 60 * 1000,
     sameSite: ['lax', 'strict'].includes(env.COOKIE_SAMESITE) ? env.COOKIE_SAMESITE : 'lax',
