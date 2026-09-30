@@ -11,6 +11,11 @@ let smtpTransport = null;
 // Buffer utilisé uniquement par les tests
 const sent = [];
 
+// ✅ Résolution unifiée des variables Gmail/SMTP
+// Accepte GMAIL_USER/GMAIL_APP_PASSWORD OU SMTP_USER/SMTP_PASSWORD
+const getGmailUser = () => process.env.GMAIL_USER || process.env.SMTP_USER;
+const getGmailPass = () => process.env.GMAIL_APP_PASSWORD || process.env.SMTP_PASSWORD;
+
 /**
  * Récupère (ou initialise) le client Resend.
  */
@@ -29,13 +34,15 @@ function getSmtpTransport() {
   if (!smtpTransport) {
     const nodemailer = require('nodemailer');
 
-    // Gmail spécifique (prioritaire si GMAIL_USER est défini)
-    if (process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD) {
+    // ✅ Gmail spécifique (accepte GMAIL_* ou SMTP_*)
+    const gmailUser = getGmailUser();
+    const gmailPass = getGmailPass();
+    if (gmailUser && gmailPass) {
       smtpTransport = nodemailer.createTransport({
         service: 'gmail',
         auth: {
-          user: process.env.GMAIL_USER,
-          pass: process.env.GMAIL_APP_PASSWORD,
+          user: gmailUser,
+          pass: gmailPass,
         },
       });
       return smtpTransport;
@@ -62,8 +69,8 @@ function getSmtpTransport() {
 /**
  * Envoie un email via le premier canal disponible :
  *
- *   1. Gmail SMTP         (si GMAIL_USER + GMAIL_APP_PASSWORD définis)
- *   2. Resend             (si RESEND_API_KEY défini)
+ *   1. Gmail SMTP         (GMAIL_* ou SMTP_*)
+ *   2. Resend             (RESEND_API_KEY)
  *   3. EmailJS            (si configuré)
  *   4. Fichier local      (dev sans config)
  *
@@ -87,15 +94,17 @@ async function sendMail({ to, subject, text, html, toName, fromName }) {
   // Nom par défaut du destinataire (dérivé de l'email)
   const recipientName = toName || to.split('@')[0];
 
+  const gmailUser = getGmailUser();
+  const gmailPass = getGmailPass();
+
   // ============================================================
   // 1. GMAIL SMTP (prioritaire si configuré)
   // ============================================================
-  if (process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD) {
+  if (gmailUser && gmailPass) {
     try {
       const transport = getSmtpTransport();
-      const fromAddress = process.env.GMAIL_USER;
       await transport.sendMail({
-        from: `"${senderName}" <${fromAddress}>`,
+        from: `"${senderName}" <${gmailUser}>`,
         to,
         subject,
         text,
@@ -115,7 +124,8 @@ async function sendMail({ to, subject, text, html, toName, fromName }) {
   // ============================================================
   // 2. SMTP GÉNÉRIQUE (si config.mail.host est défini)
   // ============================================================
-  if (config.mail?.host) {
+  if (config.mail?.host && !gmailUser) {
+    // Note : si Gmail est configuré, on saute cette étape (déjà tentée en 1)
     try {
       const transport = getSmtpTransport();
       await transport.sendMail({
