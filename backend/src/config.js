@@ -95,7 +95,4 @@ config.assertSafe = function assertSafe() {
   }
 };
 
-// Clé pour la route de setup temporaire
-config.setupKey = env.SETUP_KEY || '';
-
 module.exports = config;
