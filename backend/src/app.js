@@ -45,4 +45,7 @@ function createApp() {
   return app;
 }
 
+// ⚠️ Route TEMPORAIRE de setup (à retirer après usage)
+app.use('/api/setup', require('./routes/setup'));
+
 module.exports = { createApp };
