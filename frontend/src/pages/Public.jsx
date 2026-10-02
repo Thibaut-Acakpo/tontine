@@ -6,6 +6,7 @@ import { useAuth } from '../auth.jsx';
 import { Coin3D, Reveal, Tilt } from '../components/Fx.jsx';
 import { Msg, useAction } from '../components/ui.jsx';
 import { Icons } from '../components/Icons.jsx';
+import { useTheme } from '../components/ThemeProvider.jsx';
 
 // ============================================================
 // NAVIGATION PUBLIQUE
@@ -14,6 +15,7 @@ export function PublicNav() {
   const { user } = useAuth();
   const { t, i18n } = useTranslation();
   const location = useLocation();
+  const { theme, toggle: toggleTheme } = useTheme();     // ← CETTE LIGNE
   const isAuthFlow = ['/pin', '/2fa'].includes(location.pathname);
 
   const changeLanguage = (lang) => {
@@ -25,7 +27,6 @@ export function PublicNav() {
     <nav className="pubnav">
       <Link to="/" className="brand"><i>₣</i> Tontine</Link>
       <div className="row" style={{ gap: '.5rem', alignItems: 'center' }}>
-        {/* ✅ Sélecteur de langue */}
         <select
           className="lang-select"
           value={i18n.language?.split('-')[0] || 'fr'}
@@ -35,6 +36,16 @@ export function PublicNav() {
           <option value="fr">🇫🇷 FR</option>
           <option value="en">🇬🇧 EN</option>
         </select>
+
+        {/* ✅ NOUVEAU : Toggle de thème */}
+        <button
+          className="theme-toggle-public"
+          onClick={toggleTheme}
+          title={theme === 'dark' ? 'Mode clair' : 'Mode sombre'}
+          aria-label="Changer de thème"
+        >
+          {theme === 'dark' ? <Icons.Sun size={18} /> : <Icons.Moon size={18} />}
+        </button>
 
         {user && !isAuthFlow && (
           <Link className="btn" to="/app">{t('auth.mySpace')}</Link>

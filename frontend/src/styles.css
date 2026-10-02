@@ -2047,3 +2047,31 @@ select { max-width: 100%; }
     justify-content: center;
   }
 }
+
+/* ============================================================
+   TOGGLE DE THÈME - PAGE PUBLIQUE
+   ============================================================ */
+.theme-toggle-public {
+  background: var(--card);
+  border: 1px solid var(--line);
+  color: var(--mut);
+  cursor: pointer;
+  padding: .55rem;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  transition: background .15s, color .15s, border-color .15s;
+  width: 42px;
+  height: 42px;
+}
+
+.theme-toggle-public:hover {
+  background: rgba(242, 182, 50, .08);
+  border-color: var(--gold);
+  color: var(--gold2);
+}
+
+.theme-toggle-public svg {
+  width: 20px;
+  height: 20px;
+}
