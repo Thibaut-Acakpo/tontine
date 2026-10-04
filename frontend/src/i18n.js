@@ -20,9 +20,7 @@ const resources = {
       'menu.darkMode': 'Mode sombre',
       'menu.lightMode': 'Mode clair',
 
-      // ============================================================
       // COMMUN
-      // ============================================================
       'common.save': 'Enregistrer',
       'common.cancel': 'Annuler',
       'common.delete': 'Supprimer',
@@ -48,9 +46,7 @@ const resources = {
       'common.success': 'Succès',
       'common.lang': 'fr',
 
-      // ============================================================
       // AUTHENTIFICATION
-      // ============================================================
       'auth.login': 'Connexion',
       'auth.loginBtn': 'Se connecter',
       'auth.email': 'Email',
@@ -67,7 +63,7 @@ const resources = {
       'auth.newPassword': 'Nouveau mot de passe',
       'auth.confirmPassword': 'Confirmer le mot de passe',
       'auth.passwordMismatch': 'Les deux mots de passe ne correspondent pas.',
-      'auth.passwordMatch': '✓ Les mots de passe correspondent',
+      'auth.passwordMatch': 'Les mots de passe correspondent',
       'auth.savePassword': 'Enregistrer le nouveau mot de passe',
       'auth.saving': 'Enregistrement…',
       'auth.invalidLink': 'Lien invalide',
@@ -95,18 +91,16 @@ const resources = {
       'auth.alreadyRegistered': 'Déjà inscrit ?',
       'auth.invitationRequired': 'Invitation requise',
       'auth.invitationRequiredDesc': "L'inscription est réservée aux personnes invitées par un gestionnaire de tontine.",
-      'auth.accountCreated': 'Compte créé ✅',
+      'auth.accountCreated': 'Compte créé',
       'auth.accountCreatedDesc': 'Votre compte a été créé et vous avez été rattaché à la tontine. Vous pouvez maintenant vous connecter.',
       'auth.invitedDesc': 'Vous avez été invité à rejoindre une tontine. Créez votre compte pour y accéder.',
       'auth.emailPlaceholder': "Utilisez l'email qui a reçu l'invitation",
 
-      // ============================================================
       // DASHBOARD
-      // ============================================================
-      'dashboard.hello': 'Bonjour, {{name}} 👋',
+      'dashboard.hello': 'Bonjour, {{name}}',
       'dashboard.loading': 'Chargement de vos données…',
       'dashboard.noActive': "Vous n'avez aucune tontine active pour l'instant.",
-      'dashboard.allUpToDate': 'Tout est à jour, rien à payer. 🎉',
+      'dashboard.allUpToDate': 'Tout est à jour, rien à payer.',
       'dashboard.pendingCount': 'Vous avez {{count}} cotisation en attente.',
       'dashboard.pendingCount_plural': 'Vous avez {{count}} cotisations en attente.',
       'dashboard.activeTontines': 'Tontines actives',
@@ -115,11 +109,11 @@ const resources = {
       'dashboard.myTontines': 'Mes tontines',
       'dashboard.financialOverview': 'Aperçu financier',
       'dashboard.financialOverviewDesc': 'Montants collectés vs versés sur les tontines actives',
-      'dashboard.toPay': '💸 À payer',
+      'dashboard.toPay': 'À payer',
       'dashboard.seeAll': 'Tout voir →',
-      'dashboard.noPending': 'Aucune cotisation en attente 🎉',
+      'dashboard.noPending': 'Aucune cotisation en attente',
       'dashboard.others': '+{{count}} autres',
-      'dashboard.notifications': '🔔 Notifications',
+      'dashboard.notifications': 'Notifications',
       'dashboard.noNotifications': 'Aucune notification',
       'dashboard.myActiveTontines': 'Mes tontines actives',
       'dashboard.createFirst': 'Créer ou rejoindre une tontine',
@@ -129,15 +123,13 @@ const resources = {
       'dashboard.dueDate': 'échéance {{date}}',
       'dashboard.tour': 'tour {{number}}',
 
-      // ============================================================
       // TONTINES
-      // ============================================================
       'tontines.title': 'Mes tontines',
       'tontines.count': '{{count}} tontine affichée',
       'tontines.count_plural': '{{count}} tontines affichées',
       'tontines.none': 'Aucune tontine pour le moment',
-      'tontines.new': '+ Nouvelle tontine',
-      'tontines.close': '✕ Fermer',
+      'tontines.new': 'Nouvelle tontine',
+      'tontines.close': 'Fermer',
       'tontines.createTitle': 'Créer une nouvelle tontine',
       'tontines.name': 'Nom de la tontine',
       'tontines.namePlaceholder': 'Ex: Tontine des amis',
@@ -163,13 +155,11 @@ const resources = {
       'tontines.deleteConfirmTitle': 'Supprimer la tontine ?',
       'tontines.deleteConfirmDesc': '« {{name}} » sera définitivement supprimée. Cette action est irréversible.',
 
-      // ============================================================
       // TONTINE DÉTAIL
-      // ============================================================
-      'detail.tours': '📅 Tours',
-      'detail.members': '👥 Membres',
-      'detail.contributions': '💰 Cotisations',
-      'detail.history': '📜 Historique',
+      'detail.tours': 'Tours',
+      'detail.members': 'Membres',
+      'detail.contributions': 'Cotisations',
+      'detail.history': 'Historique',
       'detail.membersCount': 'Membres',
       'detail.roundsDone': 'Tours versés',
       'detail.totalCollected': 'Total collecté',
@@ -225,10 +215,9 @@ const resources = {
       'detail.txnCancelled': 'Transaction annulée',
       'detail.noTransactions': 'Aucune transaction.',
       'detail.noProof': 'Aucun justificatif',
-      'detail.confirmCancel': 'Confirmer l\'annulation',
-      // ============================================================
+      'detail.confirmCancel': "Confirmer l'annulation",
+
       // PROFIL
-      // ============================================================
       'profile.title': 'Mon profil',
       'profile.fullName': 'Nom complet',
       'profile.email': 'Email',
@@ -237,20 +226,18 @@ const resources = {
       'profile.edit': 'Modifier',
       'profile.myInfos': 'Informations personnelles',
       'profile.quickActions': 'Actions rapides',
-      'profile.changePassword': '🔐 Changer le mot de passe',
-      'profile.managePin': '📱 Gérer le code PIN',
-      'profile.mySessions': '🚪 Voir mes sessions',
+      'profile.changePassword': 'Changer le mot de passe',
+      'profile.managePin': 'Gérer le code PIN',
+      'profile.mySessions': 'Voir mes sessions',
       'profile.updated': 'Profil mis à jour',
 
-      // ============================================================
       // PARAMÈTRES
-      // ============================================================
       'settings.title': 'Paramètres',
       'settings.subtitle': 'Gérez la sécurité de votre compte, vos sessions et vos préférences.',
-      'settings.security': '🔐 Sécurité',
-      'settings.sessions': '🌐 Sessions',
-      'settings.preferences': '🔔 Préférences',
-      'settings.danger': '⚠️ Danger',
+      'settings.security': 'Sécurité',
+      'settings.sessions': 'Sessions',
+      'settings.preferences': 'Préférences',
+      'settings.danger': 'Danger',
       'settings.changePassword': 'Changer le mot de passe',
       'settings.changePasswordDesc': "Utilisez un mot de passe fort, unique, et que vous n'utilisez nulle part ailleurs.",
       'settings.currentPassword': 'Mot de passe actuel',
@@ -293,9 +280,7 @@ const resources = {
       'settings.pinSaved': 'Code PIN enregistré',
       'settings.pinDisabled': 'Code PIN désactivé',
 
-      // ============================================================
       // ADMIN
-      // ============================================================
       'admin.title': 'Administration',
       'admin.activeUsers': 'Utilisateurs actifs',
       'admin.activeTontines': 'Tontines actives',
@@ -303,7 +288,7 @@ const resources = {
       'admin.incidents24h': 'Incidents (24 h)',
       'admin.users': 'Utilisateurs',
       'admin.search': 'Rechercher…',
-      'admin.createUser': '+ Créer un utilisateur',
+      'admin.createUser': 'Créer un utilisateur',
       'admin.userCreated': 'Utilisateur créé',
       'admin.name': 'Nom',
       'admin.email': 'Email',
@@ -326,9 +311,7 @@ const resources = {
       'admin.deleteBtn': 'Supprimer',
       'admin.userDeleted': 'Utilisateur supprimé',
 
-      // ============================================================
       // STATUTS
-      // ============================================================
       'status.active': 'Active',
       'status.draft': 'Brouillon',
       'status.completed': 'Terminée',
@@ -343,42 +326,32 @@ const resources = {
       'status.disabled': 'Désactivé',
       'status.deleted': 'Supprimé',
 
-      // ============================================================
       // RÔLES
-      // ============================================================
       'role.admin': 'Administrateur',
       'role.manager': 'Gestionnaire',
       'role.treasurer': 'Trésorier',
       'role.member': 'Membre',
 
-      // ============================================================
       // FRÉQUENCES
-      // ============================================================
       'freq.weekly': 'Hebdomadaire',
       'freq.biweekly': 'Bimensuelle',
       'freq.monthly': 'Mensuelle',
 
-      // ============================================================
       // TYPES
-      // ============================================================
       'type.contribution': 'Cotisation',
       'type.payout': 'Versement',
       'type.reversal': 'Annulation',
       'type.cash': 'Espèces',
       'type.mobile_money': 'Mobile money',
 
-      // ============================================================
       // RECHERCHE
-      // ============================================================
       'search.placeholder': 'Rechercher une tontine, un membre...',
       'search.noResult': 'Aucun résultat',
       'search.tontines': 'Tontines',
       'search.members': 'Membres',
       'search.transactions': 'Transactions',
 
-      // ============================================================
       // NOTIFICATIONS
-      // ============================================================
       'notifications.title': 'Notifications',
       'notifications.markAllRead': 'Tout marquer comme lu',
       'notifications.none': 'Aucune notification.',
@@ -390,9 +363,7 @@ const resources = {
       'notifications.deleted': 'Notification supprimée',
       'notifications.allDeleted': 'Toutes les notifications ont été supprimées',
 
-      // ============================================================
       // PAGE D'ACCUEIL
-      // ============================================================
       'home.heroTitle': 'Votre tontine,',
       'home.heroHighlight': 'transparente',
       'home.heroEnd': 'et sécurisée.',
@@ -441,9 +412,7 @@ const resources = {
       'home.footerTerms': 'CGU',
       'home.footerRights': 'Tous droits réservés.',
 
-      // ============================================================
-      // RESET PASSWORD
-      // ============================================================
+      // RESET
       'reset.rule.length': 'Au moins 10 caractères',
       'reset.rule.upper': 'Une majuscule',
       'reset.rule.lower': 'Une minuscule',
@@ -453,9 +422,7 @@ const resources = {
       'reset.strength.good': 'Bon',
       'reset.strength.strong': 'Fort',
 
-      // ============================================================
       // LÉGAL
-      // ============================================================
       'legal.lastUpdate': 'Dernière mise à jour',
       'legal.privacyTitle': 'Politique de confidentialité',
       'legal.privacy.s1.title': '1. Introduction',
@@ -501,9 +468,7 @@ const resources = {
       'legal.terms.s10.title': '10. Résiliation',
       'legal.terms.s10.text': "Un utilisateur peut supprimer son compte à tout moment. Un administrateur peut suspendre un compte en cas de violation.",
 
-      // ============================================================
       // PAIEMENTS
-      // ============================================================
       'payments.subtitle': 'Vos cotisations et votre historique des 3 derniers mois.',
       'payments.totalPaid': 'Total payé (3 mois)',
       'payments.paymentsCount': 'Paiements effectués',
@@ -514,9 +479,7 @@ const resources = {
       'payments.last3Months': '3 derniers mois',
       'payments.noHistory': 'Aucun paiement enregistré sur les 3 derniers mois.',
 
-      // ============================================================
       // CONTACT
-      // ============================================================
       'contact.title': 'Vous souhaitez gérer vos tontines ?',
       'contact.desc': 'Contactez-nous pour créer votre compte gestionnaire et digitaliser vos tontines en quelques minutes.',
       'contact.email': 'Email',
@@ -529,9 +492,7 @@ const resources = {
 
   en: {
     translation: {
-      // ============================================================
       // MENU
-      // ============================================================
       'menu.dashboard': 'Dashboard',
       'menu.tontines': 'My tontines',
       'menu.payments': 'Payments',
@@ -545,9 +506,7 @@ const resources = {
       'menu.darkMode': 'Dark mode',
       'menu.lightMode': 'Light mode',
 
-      // ============================================================
       // COMMON
-      // ============================================================
       'common.save': 'Save',
       'common.cancel': 'Cancel',
       'common.delete': 'Delete',
@@ -573,9 +532,7 @@ const resources = {
       'common.success': 'Success',
       'common.lang': 'en',
 
-      // ============================================================
       // AUTH
-      // ============================================================
       'auth.login': 'Login',
       'auth.loginBtn': 'Log in',
       'auth.email': 'Email',
@@ -592,7 +549,7 @@ const resources = {
       'auth.newPassword': 'New password',
       'auth.confirmPassword': 'Confirm password',
       'auth.passwordMismatch': 'The passwords do not match.',
-      'auth.passwordMatch': '✓ Passwords match',
+      'auth.passwordMatch': 'Passwords match',
       'auth.savePassword': 'Save new password',
       'auth.saving': 'Saving…',
       'auth.invalidLink': 'Invalid link',
@@ -620,18 +577,16 @@ const resources = {
       'auth.alreadyRegistered': 'Already registered?',
       'auth.invitationRequired': 'Invitation required',
       'auth.invitationRequiredDesc': 'Registration is reserved for people invited by a tontine manager.',
-      'auth.accountCreated': 'Account created ✅',
+      'auth.accountCreated': 'Account created',
       'auth.accountCreatedDesc': 'Your account has been created and you have been linked to the tontine. You can now log in.',
       'auth.invitedDesc': 'You have been invited to join a tontine. Create your account to access it.',
       'auth.emailPlaceholder': 'Use the email that received the invitation',
 
-      // ============================================================
       // DASHBOARD
-      // ============================================================
-      'dashboard.hello': 'Hello, {{name}} 👋',
+      'dashboard.hello': 'Hello, {{name}}',
       'dashboard.loading': 'Loading your data…',
       'dashboard.noActive': "You don't have any active tontine yet.",
-      'dashboard.allUpToDate': 'Everything is up to date, nothing to pay. 🎉',
+      'dashboard.allUpToDate': 'Everything is up to date, nothing to pay.',
       'dashboard.pendingCount': 'You have {{count}} pending contribution.',
       'dashboard.pendingCount_plural': 'You have {{count}} pending contributions.',
       'dashboard.activeTontines': 'Active tontines',
@@ -640,11 +595,11 @@ const resources = {
       'dashboard.myTontines': 'My tontines',
       'dashboard.financialOverview': 'Financial overview',
       'dashboard.financialOverviewDesc': 'Amounts collected vs paid on active tontines',
-      'dashboard.toPay': '💸 To pay',
+      'dashboard.toPay': 'To pay',
       'dashboard.seeAll': 'See all →',
-      'dashboard.noPending': 'No pending contribution 🎉',
+      'dashboard.noPending': 'No pending contribution',
       'dashboard.others': '+{{count}} more',
-      'dashboard.notifications': '🔔 Notifications',
+      'dashboard.notifications': 'Notifications',
       'dashboard.noNotifications': 'No notification',
       'dashboard.myActiveTontines': 'My active tontines',
       'dashboard.createFirst': 'Create or join a tontine',
@@ -654,15 +609,13 @@ const resources = {
       'dashboard.dueDate': 'due {{date}}',
       'dashboard.tour': 'round {{number}}',
 
-      // ============================================================
       // TONTINES
-      // ============================================================
       'tontines.title': 'My tontines',
       'tontines.count': '{{count}} tontine displayed',
       'tontines.count_plural': '{{count}} tontines displayed',
       'tontines.none': 'No tontine yet',
-      'tontines.new': '+ New tontine',
-      'tontines.close': '✕ Close',
+      'tontines.new': 'New tontine',
+      'tontines.close': 'Close',
       'tontines.createTitle': 'Create a new tontine',
       'tontines.name': 'Tontine name',
       'tontines.namePlaceholder': 'Ex: Friends tontine',
@@ -688,13 +641,11 @@ const resources = {
       'tontines.deleteConfirmTitle': 'Delete this tontine?',
       'tontines.deleteConfirmDesc': '"{{name}}" will be permanently deleted. This action is irreversible.',
 
-      // ============================================================
       // TONTINE DETAIL
-      // ============================================================
-      'detail.tours': '📅 Rounds',
-      'detail.members': '👥 Members',
-      'detail.contributions': '💰 Contributions',
-      'detail.history': '📜 History',
+      'detail.tours': 'Rounds',
+      'detail.members': 'Members',
+      'detail.contributions': 'Contributions',
+      'detail.history': 'History',
       'detail.membersCount': 'Members',
       'detail.roundsDone': 'Rounds paid',
       'detail.totalCollected': 'Total collected',
@@ -752,9 +703,7 @@ const resources = {
       'detail.noProof': 'No proof',
       'detail.confirmCancel': 'Confirm cancellation',
 
-      // ============================================================
       // PROFILE
-      // ============================================================
       'profile.title': 'My profile',
       'profile.fullName': 'Full name',
       'profile.email': 'Email',
@@ -763,20 +712,18 @@ const resources = {
       'profile.edit': 'Edit',
       'profile.myInfos': 'Personal information',
       'profile.quickActions': 'Quick actions',
-      'profile.changePassword': '🔐 Change password',
-      'profile.managePin': '📱 Manage PIN code',
-      'profile.mySessions': '🚪 View my sessions',
+      'profile.changePassword': 'Change password',
+      'profile.managePin': 'Manage PIN code',
+      'profile.mySessions': 'View my sessions',
       'profile.updated': 'Profile updated',
 
-      // ============================================================
       // SETTINGS
-      // ============================================================
       'settings.title': 'Settings',
       'settings.subtitle': 'Manage your account security, sessions and preferences.',
-      'settings.security': '🔐 Security',
-      'settings.sessions': '🌐 Sessions',
-      'settings.preferences': '🔔 Preferences',
-      'settings.danger': '⚠️ Danger',
+      'settings.security': 'Security',
+      'settings.sessions': 'Sessions',
+      'settings.preferences': 'Preferences',
+      'settings.danger': 'Danger',
       'settings.changePassword': 'Change password',
       'settings.changePasswordDesc': "Use a strong password, unique, that you don't use anywhere else.",
       'settings.currentPassword': 'Current password',
@@ -819,9 +766,7 @@ const resources = {
       'settings.pinSaved': 'PIN code saved',
       'settings.pinDisabled': 'PIN code disabled',
 
-      // ============================================================
       // ADMIN
-      // ============================================================
       'admin.title': 'Administration',
       'admin.activeUsers': 'Active users',
       'admin.activeTontines': 'Active tontines',
@@ -829,7 +774,7 @@ const resources = {
       'admin.incidents24h': 'Incidents (24h)',
       'admin.users': 'Users',
       'admin.search': 'Search…',
-      'admin.createUser': '+ Create user',
+      'admin.createUser': 'Create user',
       'admin.userCreated': 'User created',
       'admin.name': 'Name',
       'admin.email': 'Email',
@@ -852,9 +797,7 @@ const resources = {
       'admin.deleteBtn': 'Delete',
       'admin.userDeleted': 'User deleted',
 
-      // ============================================================
       // STATUS
-      // ============================================================
       'status.active': 'Active',
       'status.draft': 'Draft',
       'status.completed': 'Completed',
@@ -869,42 +812,32 @@ const resources = {
       'status.disabled': 'Disabled',
       'status.deleted': 'Deleted',
 
-      // ============================================================
       // ROLES
-      // ============================================================
       'role.admin': 'Administrator',
       'role.manager': 'Manager',
       'role.treasurer': 'Treasurer',
       'role.member': 'Member',
 
-      // ============================================================
       // FREQUENCIES
-      // ============================================================
       'freq.weekly': 'Weekly',
       'freq.biweekly': 'Biweekly',
       'freq.monthly': 'Monthly',
 
-      // ============================================================
       // TYPES
-      // ============================================================
       'type.contribution': 'Contribution',
       'type.payout': 'Payout',
       'type.reversal': 'Reversal',
       'type.cash': 'Cash',
       'type.mobile_money': 'Mobile money',
 
-      // ============================================================
       // SEARCH
-      // ============================================================
       'search.placeholder': 'Search a tontine, a member...',
       'search.noResult': 'No result',
       'search.tontines': 'Tontines',
       'search.members': 'Members',
       'search.transactions': 'Transactions',
 
-      // ============================================================
       // NOTIFICATIONS
-      // ============================================================
       'notifications.title': 'Notifications',
       'notifications.markAllRead': 'Mark all as read',
       'notifications.none': 'No notification.',
@@ -916,9 +849,7 @@ const resources = {
       'notifications.deleted': 'Notification deleted',
       'notifications.allDeleted': 'All notifications deleted',
 
-      // ============================================================
       // HOME PAGE
-      // ============================================================
       'home.heroTitle': 'Your tontine,',
       'home.heroHighlight': 'transparent',
       'home.heroEnd': 'and secure.',
@@ -967,9 +898,7 @@ const resources = {
       'home.footerTerms': 'Terms',
       'home.footerRights': 'All rights reserved.',
 
-      // ============================================================
-      // RESET PASSWORD
-      // ============================================================
+      // RESET
       'reset.rule.length': 'At least 10 characters',
       'reset.rule.upper': 'One uppercase letter',
       'reset.rule.lower': 'One lowercase letter',
@@ -979,9 +908,7 @@ const resources = {
       'reset.strength.good': 'Good',
       'reset.strength.strong': 'Strong',
 
-      // ============================================================
       // LEGAL
-      // ============================================================
       'legal.lastUpdate': 'Last update',
       'legal.privacyTitle': 'Privacy Policy',
       'legal.privacy.s1.title': '1. Introduction',
@@ -1027,9 +954,7 @@ const resources = {
       'legal.terms.s10.title': '10. Termination',
       'legal.terms.s10.text': 'A user can delete their account at any time. An administrator may suspend an account in case of violation.',
 
-      // ============================================================
       // PAYMENTS
-      // ============================================================
       'payments.subtitle': 'Your contributions and history from the last 3 months.',
       'payments.totalPaid': 'Total paid (3 months)',
       'payments.paymentsCount': 'Payments made',
@@ -1040,9 +965,7 @@ const resources = {
       'payments.last3Months': 'Last 3 months',
       'payments.noHistory': 'No payment recorded in the last 3 months.',
 
-      // ============================================================
       // CONTACT
-      // ============================================================
       'contact.title': 'Want to manage your tontines?',
       'contact.desc': 'Contact us to create your manager account and digitize your tontines in minutes.',
       'contact.email': 'Email',

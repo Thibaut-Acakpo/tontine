@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { api, money, fdate, fdatetime, qs } from '../api.js';
 import { useAuth } from '../auth.jsx';
 import { Tilt } from '../components/Fx.jsx';
-import { Badge, Empty, Msg, Pager, useAction, toast, ConfirmModal } from '../components/ui.jsx';
+import { Badge, Empty, Msg, Pager, useAction, toast, ConfirmModal, Modal, Skeleton } from '../components/ui.jsx';
 import { Icons } from '../components/Icons.jsx';
 
 // ✅ Avatar à initiales
@@ -55,7 +55,6 @@ export function Payments() {
       <h1>{t('menu.payments')}</h1>
       <p className="mut">{t('payments.subtitle')}</p>
 
-      {/* Statistiques */}
       <div className="grid g4 mt">
         {loading ? (
           <>
@@ -86,9 +85,8 @@ export function Payments() {
         )}
       </div>
 
-      {/* À payer */}
       <div className="card mt">
-        <h3>💸 {t('payments.toPay')}</h3>
+        <h3><Icons.Wallet size={18} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '.4rem' }} /> {t('payments.toPay')}</h3>
         {due === null ? (
           <p className="mut sm mt">{t('common.loading')}</p>
         ) : due.length === 0 ? (
@@ -112,10 +110,9 @@ export function Payments() {
         )}
       </div>
 
-      {/* Historique des paiements */}
       <div className="card mt">
         <div className="row between">
-          <h3>📜 {t('payments.history')}</h3>
+          <h3><Icons.File size={18} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '.4rem' }} /> {t('payments.history')}</h3>
           <span className="mut sm">{t('payments.last3Months')}</span>
         </div>
 
@@ -173,7 +170,7 @@ export function Notifications() {
   const [page, setPage] = useState(1);
   const [res, setRes] = useState({ data: [], meta: null });
   const [tick, setTick] = useState(0);
-  const [confirmDelete, setConfirmDelete] = useState(null); // {id, title} ou 'all'
+  const [confirmDelete, setConfirmDelete] = useState(null);
   const del = useAction();
 
   useEffect(() => {
@@ -393,11 +390,11 @@ export function Settings() {
   const [tab, setTab] = useState('security');
 
   const tabs = [
-    ['security', t('settings.security')],
-    ['sessions', t('settings.sessions')],
-    ['preferences', t('settings.preferences')],
-    ['danger', t('settings.danger')],
-  ];
+  ['security', <><Icons.Lock size={16} /> {t('settings.security')}</>],
+  ['sessions', <><Icons.Globe size={16} /> {t('settings.sessions')}</>],
+  ['preferences', <><Icons.Notifications size={16} /> {t('settings.preferences')}</>],
+  ['danger', <><Icons.Warning size={16} /> {t('settings.danger')}</>],
+];
 
   return (
     <>
@@ -406,7 +403,12 @@ export function Settings() {
 
       <div className="tabs" style={{ marginTop: '1.5rem' }}>
         {tabs.map(([k, l]) => (
-          <button key={k} className={tab === k ? 'on' : ''} onClick={() => setTab(k)}>
+          <button 
+              key={k} 
+              className={tab === k ? 'on' : ''} 
+              onClick={() => setTab(k)}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '.4rem' }}
+            >
             {l}
           </button>
         ))}
@@ -420,55 +422,460 @@ export function Settings() {
   );
 }
 
+// ============================================================
+// ONGLET SÉCURITÉ
+// ============================================================
 function SecurityTab() {
   const { t } = useTranslation();
-  const pw = useAction();
-  const [f, setF] = useState({ currentPassword: '', newPassword: '' });
+  const [modal, setModal] = useState(null);
+  const [pinStatus, setPinStatus] = useState(null);
+  const [twoFAStatus, setTwoFAStatus] = useState(null);
+
+  const loadStatuses = () => {
+    api('/auth/pin/status').then((r) => setPinStatus(r.data)).catch(() => {});
+    api('/auth/2fa/status').then((r) => setTwoFAStatus(r.data)).catch(() => {});
+  };
+
+  useEffect(() => { loadStatuses(); }, []);
+
+  const score = 1 + (pinStatus?.hasPin ? 1 : 0) + (twoFAStatus?.enabled ? 1 : 0);
+  const scorePercent = Math.round((score / 3) * 100);
 
   return (
-    <div className="grid g2">
-      <form className="card" onSubmit={async (e) => {
-        e.preventDefault();
-        if (await pw.run(() => api('/auth/change-password', { method: 'POST', body: f }), t('settings.passwordChanged'))) {
-          setF({ currentPassword: '', newPassword: '' });
-        }
-      }}>
-        <h3><Icons.Lock size={18} /> {t('settings.changePassword')}</h3>
-        <p className="mut sm">{t('settings.changePasswordDesc')}</p>
-        <label>{t('settings.currentPassword')}</label>
-        <input required type="password" value={f.currentPassword} onChange={(e) => setF({ ...f, currentPassword: e.target.value })} autoComplete="current-password" />
-        <label>{t('settings.newPassword')}</label>
-        <input required type="password" minLength={10} value={f.newPassword} onChange={(e) => setF({ ...f, newPassword: e.target.value })} autoComplete="new-password" />
-        <Msg>{pw.error}</Msg>
-        <Msg kind="ok">{pw.info}</Msg>
-        <button className="btn mt" disabled={pw.busy}>{pw.busy ? '…' : t('settings.changeBtn')}</button>
-      </form>
-
-      <div className="card">
-        <h3><Icons.Phone size={18} /> {t('settings.codePin')}</h3>
-        <p className="mut sm">{t('settings.codePinDesc')}</p>
-        <PinSettings />
+    <>
+      <div className="security-score mt">
+        <div className="security-score-header">
+          <div className="security-score-icon">
+            <Icons.Lock size={22} />
+          </div>
+          <div className="security-score-text">
+            <h3>{t('settings.security')}</h3>
+            <p className="mut sm">
+              {score} {score > 1 ? 'protections activées' : 'protection activée'} sur 3
+            </p>
+          </div>
+          <div className="security-score-value">
+            <b>{scorePercent}%</b>
+          </div>
+        </div>
+        <div className="progress" style={{ marginTop: '1rem' }}>
+          <i style={{ width: `${scorePercent}%` }} />
+        </div>
       </div>
 
-      <div className="card" style={{ gridColumn: '1 / -1' }}>
-        <h3><Icons.Key size={18} /> {t('settings.twoFA')}</h3>
-        <TwoFASettings />
+      <div className="security-list mt">
+        <div className="security-item">
+          <div className="security-item-icon">
+            <Icons.Lock size={20} />
+          </div>
+          <div className="security-item-content">
+            <div className="security-item-title">{t('settings.changePassword')}</div>
+            <div className="security-item-desc">{t('settings.changePasswordDesc')}</div>
+          </div>
+          <div className="security-item-status">
+            <Badge v="active" />
+          </div>
+          <button className="btn sm" onClick={() => setModal('password')}>
+            {t('profile.edit')} →
+          </button>
+        </div>
+
+        <div className="security-item">
+          <div className="security-item-icon">
+            <Icons.Phone size={20} />
+          </div>
+          <div className="security-item-content">
+            <div className="security-item-title">{t('settings.codePin')}</div>
+            <div className="security-item-desc">
+              {pinStatus?.hasPin
+                ? 'Accès rapide activé sur cet appareil'
+                : 'Aucun code PIN configuré'}
+            </div>
+          </div>
+          <div className="security-item-status">
+            {pinStatus === null ? (
+              <Skeleton width="70px" height="22px" radius={11} />
+            ) : pinStatus.hasPin ? (
+              <Badge v="active" />
+            ) : (
+              <Badge v="pending" />
+            )}
+          </div>
+          <button className="btn sm" onClick={() => setModal('pin')}>
+            {pinStatus?.hasPin ? t('settings.pinChange') : t('settings.pinSet')} →
+          </button>
+        </div>
+
+        <div className="security-item">
+          <div className="security-item-icon">
+            <Icons.Key size={20} />
+          </div>
+          <div className="security-item-content">
+            <div className="security-item-title">{t('settings.twoFA')}</div>
+            <div className="security-item-desc">
+              {twoFAStatus?.enabled
+                ? 'Google Authenticator actif'
+                : 'Ajoutez une couche de sécurité supplémentaire'}
+            </div>
+          </div>
+          <div className="security-item-status">
+            {twoFAStatus === null ? (
+              <Skeleton width="70px" height="22px" radius={11} />
+            ) : twoFAStatus.enabled ? (
+              <Badge v="active" />
+            ) : (
+              <Badge v="pending" />
+            )}
+          </div>
+          <button className="btn sm" onClick={() => setModal('2fa')}>
+            {twoFAStatus?.enabled ? t('profile.edit') : t('settings.twoFA')} →
+          </button>
+        </div>
       </div>
-    </div>
+
+      <Modal open={modal === 'password'} title={t('settings.changePassword')} onClose={() => setModal(null)}>
+        <PasswordForm onSuccess={() => setModal(null)} />
+      </Modal>
+
+      <Modal open={modal === 'pin'} title={t('settings.codePin')} onClose={() => setModal(null)}>
+        <PinForm
+          status={pinStatus}
+          onSuccess={() => { setModal(null); loadStatuses(); }}
+        />
+      </Modal>
+
+      <Modal open={modal === '2fa'} title={t('settings.twoFA')} onClose={() => setModal(null)} width={560}>
+        <TwoFAForm
+          status={twoFAStatus}
+          onSuccess={() => { setModal(null); loadStatuses(); }}
+        />
+      </Modal>
+    </>
   );
 }
 
+// ============================================================
+// FORMULAIRE MOT DE PASSE (dans modale)
+// ============================================================
+function PasswordForm({ onSuccess }) {
+  const { t } = useTranslation();
+  const a = useAction();
+  const [f, setF] = useState({ currentPassword: '', newPassword: '' });
+
+  const submit = async (e) => {
+    e.preventDefault();
+    if (await a.run(() => api('/auth/change-password', { method: 'POST', body: f }), t('settings.passwordChanged'))) {
+      toast(t('settings.passwordChanged'), 'success');
+      onSuccess();
+    }
+  };
+
+  return (
+    <form onSubmit={submit}>
+      <label>{t('settings.currentPassword')}</label>
+      <input
+        required
+        type="password"
+        value={f.currentPassword}
+        onChange={(e) => setF({ ...f, currentPassword: e.target.value })}
+        autoComplete="current-password"
+        autoFocus
+      />
+      <label>{t('settings.newPassword')}</label>
+      <input
+        required
+        type="password"
+        minLength={10}
+        value={f.newPassword}
+        onChange={(e) => setF({ ...f, newPassword: e.target.value })}
+        autoComplete="new-password"
+      />
+      <Msg>{a.error}</Msg>
+      <div className="row between mt" style={{ gap: '.5rem' }}>
+        <button type="button" className="btn ghost" onClick={onSuccess}>{t('common.cancel')}</button>
+        <button className="btn" disabled={a.busy}>{a.busy ? '…' : t('settings.changeBtn')}</button>
+      </div>
+    </form>
+  );
+}
+
+// ============================================================
+// FORMULAIRE PIN (dans modale)
+// ============================================================
+function PinForm({ status, onSuccess }) {
+  const { t } = useTranslation();
+  const a = useAction();
+  const [mode, setMode] = useState(status?.hasPin ? null : 'set');
+  const [pin, setPin] = useState('');
+  const [confirmPin, setConfirmPin] = useState('');
+  const [password, setPassword] = useState('');
+
+  const submitSet = async (e) => {
+    e.preventDefault();
+    if (pin !== confirmPin) { a.setError(t('auth.passwordMismatch')); return; }
+    if (await a.run(() => api('/auth/pin/set', { method: 'POST', body: { pin, password } }), t('settings.pinSaved'))) {
+      toast(t('settings.pinSaved'), 'success');
+      onSuccess();
+    }
+  };
+
+  const submitRemove = async (e) => {
+    e.preventDefault();
+    if (await a.run(() => api('/auth/pin/remove', { method: 'POST', body: { password } }), t('settings.pinDisabled'))) {
+      toast(t('settings.pinDisabled'), 'success');
+      onSuccess();
+    }
+  };
+
+  if (mode === null) {
+    return (
+      <>
+        <Msg kind="ok">{t('settings.pinActive')}</Msg>
+        <div className="row between mt" style={{ gap: '.5rem' }}>
+          <button type="button" className="btn ghost" onClick={onSuccess}>{t('common.cancel')}</button>
+          <div className="row" style={{ gap: '.4rem' }}>
+            <button className="btn" onClick={() => setMode('set')}>{t('settings.pinChange')}</button>
+            <button className="btn danger" onClick={() => setMode('remove')}>{t('settings.pinDisable')}</button>
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  if (mode === 'set') {
+    return (
+      <form onSubmit={submitSet}>
+        <label>{t('settings.codePin')} (4 chiffres)</label>
+        <input
+          type="password"
+          inputMode="numeric"
+          maxLength={4}
+          pattern="\d{4}"
+          required
+          value={pin}
+          onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
+          autoComplete="off"
+          autoFocus
+          style={{ fontSize: '1.3rem', letterSpacing: '0.3em', textAlign: 'center', fontWeight: 700 }}
+        />
+        <label>{t('auth.confirmPassword')}</label>
+        <input
+          type="password"
+          inputMode="numeric"
+          maxLength={4}
+          pattern="\d{4}"
+          required
+          value={confirmPin}
+          onChange={(e) => setConfirmPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
+          autoComplete="off"
+          style={{ fontSize: '1.3rem', letterSpacing: '0.3em', textAlign: 'center', fontWeight: 700 }}
+        />
+        <label>{t('auth.password')}</label>
+        <input
+          type="password"
+          required
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          autoComplete="current-password"
+        />
+        <Msg>{a.error}</Msg>
+        <div className="row between mt" style={{ gap: '.5rem' }}>
+          <button type="button" className="btn ghost" onClick={() => setMode(null)}>{t('common.cancel')}</button>
+          <button className="btn" disabled={a.busy || pin.length !== 4 || confirmPin.length !== 4}>
+            {a.busy ? '…' : t('common.save')}
+          </button>
+        </div>
+      </form>
+    );
+  }
+
+  return (
+    <form onSubmit={submitRemove}>
+      <Msg kind="err">{t('settings.pinDisable')} ?</Msg>
+      <label>{t('auth.password')}</label>
+      <input
+        type="password"
+        required
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        autoComplete="current-password"
+        autoFocus
+      />
+      <Msg>{a.error}</Msg>
+      <div className="row between mt" style={{ gap: '.5rem' }}>
+        <button type="button" className="btn ghost" onClick={() => setMode(null)}>{t('common.cancel')}</button>
+        <button className="btn danger" disabled={a.busy}>{t('settings.pinDisable')}</button>
+      </div>
+    </form>
+  );
+}
+
+// ============================================================
+// FORMULAIRE 2FA (dans modale)
+// ============================================================
+function TwoFAForm({ status, onSuccess }) {
+  const { t } = useTranslation();
+  const { refresh } = useAuth();
+  const a = useAction();
+  const [mode, setMode] = useState(status?.enabled ? null : 'setup');
+  const [setup, setSetup] = useState(null);
+  const [code, setCode] = useState('');
+  const [password, setPassword] = useState('');
+  const [backupCodes, setBackupCodes] = useState(null);
+
+  const startSetup = async () => {
+    const r = await a.run(() => api('/auth/2fa/setup', { method: 'POST', body: {} }));
+    if (r) { setSetup(r.data); setMode('enable'); }
+  };
+
+  const enable = async (e) => {
+    e.preventDefault();
+    const r = await a.run(() => api('/auth/2fa/enable', { method: 'POST', body: { code } }), t('settings.saved'));
+    if (r) {
+      setBackupCodes(r.data.backupCodes);
+      setMode('backup-codes');
+      await refresh();
+    }
+  };
+
+  const disable = async (e) => {
+    e.preventDefault();
+    if (await a.run(() => api('/auth/2fa/disable', { method: 'POST', body: { password } }), t('common.success'))) {
+      toast(t('common.success'), 'success');
+      await refresh();
+      onSuccess();
+    }
+  };
+
+  if (mode === null) {
+    return (
+      <>
+        <Msg kind="ok">{t('settings.pinActive')}</Msg>
+        <div className="row between mt" style={{ gap: '.5rem' }}>
+          <button type="button" className="btn ghost" onClick={onSuccess}>{t('common.cancel')}</button>
+          <button className="btn danger" onClick={() => setMode('disable')}>{t('common.delete')}</button>
+        </div>
+      </>
+    );
+  }
+
+  if (mode === 'setup') {
+    return (
+      <>
+        <p className="mut sm">
+          Ajoutez une couche de sécurité supplémentaire. Vous aurez besoin
+          de Google Authenticator (ou compatible) sur votre téléphone.
+        </p>
+        <div className="row between mt" style={{ gap: '.5rem' }}>
+          <button type="button" className="btn ghost" onClick={onSuccess}>{t('common.cancel')}</button>
+          <button className="btn" onClick={startSetup} disabled={a.busy}>
+            <Icons.Key size={16} /> {t('settings.twoFA')}
+          </button>
+        </div>
+      </>
+    );
+  }
+
+  if (mode === 'enable') {
+    return (
+      <form onSubmit={enable}>
+        <h4 style={{ marginTop: 0 }}>1. Scannez ce QR code</h4>
+        <div style={{ textAlign: 'center', margin: '1rem 0' }}>
+          <img src={setup.qrCode} alt="QR Code 2FA" style={{ maxWidth: 220, borderRadius: 12, background: '#fff', padding: 8 }} />
+        </div>
+        <p className="mut sm" style={{ textAlign: 'center' }}>Ou entrez le code manuellement :</p>
+        <code style={{ display: 'block', padding: '.6rem', background: 'var(--input-bg)', borderRadius: 8, wordBreak: 'break-all', fontSize: '.85rem', textAlign: 'center' }}>
+          {setup.secret}
+        </code>
+        <h4>2. Entrez le code à 6 chiffres</h4>
+        <input
+          type="text"
+          inputMode="numeric"
+          maxLength={6}
+          pattern="\d{6}"
+          required
+          value={code}
+          onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+          placeholder="123456"
+          style={{ fontSize: '1.3rem', letterSpacing: '0.2em', textAlign: 'center', fontWeight: 700 }}
+          autoFocus
+        />
+        <Msg>{a.error}</Msg>
+        <div className="row between mt" style={{ gap: '.5rem' }}>
+          <button type="button" className="btn ghost" onClick={() => setMode('setup')}>{t('common.cancel')}</button>
+          <button className="btn" disabled={a.busy || code.length !== 6}>{t('auth.validate')}</button>
+        </div>
+      </form>
+    );
+  }
+
+  if (mode === 'backup-codes') {
+    return (
+      <>
+        <Msg kind="ok">✅ {t('common.success')}</Msg>
+        <p className="mut sm">
+          Conservez ces codes de secours dans un endroit sûr. Ils vous permettront
+          de vous connecter si vous perdez votre téléphone.
+        </p>
+        <div className="backup-codes-grid">
+          {backupCodes.map((c, i) => (
+            <code key={i} className="backup-code">{c}</code>
+          ))}
+        </div>
+        <button
+          className="btn mt"
+          style={{ width: '100%' }}
+          onClick={async () => {
+            try {
+              await navigator.clipboard.writeText(backupCodes.join('\n'));
+              toast(t('common.success'), 'success');
+            } catch { /* ignore */ }
+          }}
+        >
+          <Icons.Copy size={16} /> {t('common.save')}
+        </button>
+        <button className="btn ghost mt" onClick={onSuccess} style={{ width: '100%' }}>
+          {t('common.close')}
+        </button>
+      </>
+    );
+  }
+
+  return (
+    <form onSubmit={disable}>
+      <Msg kind="err">{t('common.delete')} 2FA ?</Msg>
+      <label>{t('auth.password')}</label>
+      <input
+        type="password"
+        required
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        autoComplete="current-password"
+        autoFocus
+      />
+      <Msg>{a.error}</Msg>
+      <div className="row between mt" style={{ gap: '.5rem' }}>
+        <button type="button" className="btn ghost" onClick={() => setMode(null)}>{t('common.cancel')}</button>
+        <button className="btn danger" disabled={a.busy}>{t('common.delete')}</button>
+      </div>
+    </form>
+  );
+}
+
+// ============================================================
+// ONGLET SESSIONS
+// ============================================================
 function SessionsTab() {
   const { t } = useTranslation();
   return (
     <div className="grid">
       <div className="card">
-        <h3><Icons.Globe size={18} /> {t('settings.activeSessions')}</h3>
+        <h3><Icons.Globe size={18} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '.4rem' }} /> {t('settings.activeSessions')}</h3>
         <p className="mut sm">{t('settings.activeSessionsDesc')}</p>
         <SessionsList />
       </div>
       <div className="card">
-        <h3><Icons.File size={18} /> {t('settings.loginHistory')}</h3>
+        <h3><Icons.File size={18} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '.4rem' }} /> {t('settings.loginHistory')}</h3>
         <p className="mut sm">{t('settings.loginHistoryDesc')}</p>
         <LoginHistory />
       </div>
@@ -497,7 +904,12 @@ function SessionsList() {
             <div className="mut sm" style={{ wordBreak: 'break-word', marginTop: '.2rem' }}>
               {s.userAgent || t('settings.unknownDevice')}
             </div>
-            <div className="mut sm">📍 {s.ip} · 🕐 {fdatetime(s.lastSeenAt)}</div>
+            <div className="mut sm" style={{ display: 'flex', alignItems: 'center', gap: '.4rem', marginTop: '.2rem' }}>
+              <Icons.Location size={12} />
+              <span>{s.ip}</span>
+              <span>·</span>
+              <span>{fdatetime(s.lastSeenAt)}</span>
+            </div>
           </div>
           {!s.current && (
             <button className="btn ghost sm" onClick={async () => {
@@ -511,6 +923,9 @@ function SessionsList() {
   );
 }
 
+// ============================================================
+// ONGLET PRÉFÉRENCES
+// ============================================================
 function PreferencesTab() {
   const { t } = useTranslation();
   const { user, refresh } = useAuth();
@@ -529,7 +944,7 @@ function PreferencesTab() {
 
   return (
     <div className="card" style={{ maxWidth: 620 }}>
-      <h3><Icons.Notifications size={18} /> {t('settings.notifications')}</h3>
+      <h3><Icons.Notifications size={18} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '.4rem' }} /> {t('settings.notifications')}</h3>
       <p className="mut sm">{t('settings.notificationsDesc')}</p>
 
       <div className="pref-row">
@@ -553,6 +968,9 @@ function PreferencesTab() {
   );
 }
 
+// ============================================================
+// ONGLET DANGER
+// ============================================================
 function DangerTab() {
   const { t } = useTranslation();
   const { logout } = useAuth();
@@ -575,7 +993,7 @@ function DangerTab() {
 
   return (
     <div className="card danger-zone" style={{ maxWidth: 620 }}>
-      <h3><Icons.Warning size={18} /> {t('settings.dangerZone')}</h3>
+      <h3><Icons.Warning size={18} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '.4rem' }} /> {t('settings.dangerZone')}</h3>
       <p className="mut sm">{t('settings.dangerZoneDesc')}</p>
       <p className="mut sm"><b>{t('settings.dangerZoneImpossible')}</b></p>
 
@@ -596,228 +1014,6 @@ function DangerTab() {
 }
 
 // ============================================================
-// CODE PIN
-// ============================================================
-function PinSettings() {
-  const { t } = useTranslation();
-  const [status, setStatus] = useState(null);
-  const [mode, setMode] = useState(null);
-  const [pin, setPin] = useState('');
-  const [confirmPin, setConfirmPin] = useState('');
-  const [password, setPassword] = useState('');
-  const a = useAction();
-
-  const load = () => api('/auth/pin/status').then((r) => setStatus(r.data)).catch(() => {});
-  useEffect(() => { load(); }, []);
-
-  const reset = () => { setMode(null); setPin(''); setConfirmPin(''); setPassword(''); a.setError(''); a.setInfo(''); };
-
-  const submitSet = async (e) => {
-    e.preventDefault();
-    if (pin !== confirmPin) { a.setError(t('auth.passwordMismatch')); return; }
-    if (!/^\d{4}$/.test(pin)) { a.setError('PIN 4 digits'); return; }
-    if (await a.run(() => api('/auth/pin/set', { method: 'POST', body: { pin, password } }), t('settings.pinSaved'))) {
-      reset(); load();
-    }
-  };
-
-  const submitRemove = async (e) => {
-    e.preventDefault();
-    if (await a.run(() => api('/auth/pin/remove', { method: 'POST', body: { password } }), t('settings.pinDisabled'))) {
-      reset(); load();
-    }
-  };
-
-  if (status === null) return <p className="mut sm">{t('common.loading')}</p>;
-
-  if (mode === null) {
-    return (
-      <>
-        <p className="mt">{t('settings.pinStatus')} : {status.hasPin ? <Badge v="active" /> : <Badge v="pending" />}</p>
-        {status.locked && <Msg kind="err">{t('settings.pinLocked', { date: fdatetime(status.lockedUntil) })}</Msg>}
-        <div className="row mt" style={{ gap: '.5rem' }}>
-          {status.hasPin ? (
-            <>
-              <button className="btn" onClick={() => setMode('set')}>{t('settings.pinChange')}</button>
-              <button className="btn danger" onClick={() => setMode('remove')}>{t('settings.pinDisable')}</button>
-            </>
-          ) : (
-            <button className="btn" onClick={() => setMode('set')}>{t('settings.pinSet')}</button>
-          )}
-        </div>
-        <Msg>{a.error}</Msg>
-        <Msg kind="ok">{a.info}</Msg>
-      </>
-    );
-  }
-
-  if (mode === 'set') {
-    return (
-      <form onSubmit={submitSet}>
-        <label>{t('settings.newPassword')} (PIN)</label>
-        <input type="password" inputMode="numeric" maxLength={4} pattern="\d{4}" required value={pin}
-          onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 4))} autoComplete="off" />
-        <label>{t('auth.confirmPassword')}</label>
-        <input type="password" inputMode="numeric" maxLength={4} pattern="\d{4}" required value={confirmPin}
-          onChange={(e) => setConfirmPin(e.target.value.replace(/\D/g, '').slice(0, 4))} autoComplete="off" />
-        <label>{t('auth.password')}</label>
-        <input type="password" required value={password}
-          onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" />
-        <Msg>{a.error}</Msg>
-        <Msg kind="ok">{a.info}</Msg>
-        <div className="row mt" style={{ gap: '.5rem' }}>
-          <button type="button" className="btn ghost" onClick={reset}>{t('common.cancel')}</button>
-          <button className="btn" disabled={a.busy || pin.length !== 4 || confirmPin.length !== 4}>
-            {a.busy ? '…' : t('common.save')}
-          </button>
-        </div>
-      </form>
-    );
-  }
-
-  return (
-    <form onSubmit={submitRemove}>
-      <p className="mut sm">{t('settings.codePinDesc')}</p>
-      <label>{t('auth.password')}</label>
-      <input type="password" required value={password}
-        onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" />
-      <Msg>{a.error}</Msg>
-      <div className="row mt" style={{ gap: '.5rem' }}>
-        <button type="button" className="btn ghost" onClick={reset}>{t('common.cancel')}</button>
-        <button className="btn danger" disabled={a.busy}>{t('settings.pinDisable')}</button>
-      </div>
-    </form>
-  );
-}
-
-// ============================================================
-// 2FA
-// ============================================================
-function TwoFASettings() {
-  const { t } = useTranslation();
-  const { refresh } = useAuth();
-  const [status, setStatus] = useState(null);
-  const [mode, setMode] = useState(null);
-  const [setup, setSetup] = useState(null);
-  const [code, setCode] = useState('');
-  const [password, setPassword] = useState('');
-  const [backupCodes, setBackupCodes] = useState(null);
-  const a = useAction();
-
-  const load = () => api('/auth/2fa/status').then((r) => setStatus(r.data)).catch(() => {});
-  useEffect(() => { load(); }, []);
-
-  const reset = () => {
-    setMode(null); setSetup(null); setCode(''); setPassword(''); setBackupCodes(null);
-    a.setError(''); a.setInfo('');
-  };
-
-  const startSetup = async () => {
-    const r = await a.run(() => api('/auth/2fa/setup', { method: 'POST', body: {} }));
-    if (r) { setSetup(r.data); setMode('enable'); }
-  };
-
-  const enable = async (e) => {
-    e.preventDefault();
-    const r = await a.run(() => api('/auth/2fa/enable', { method: 'POST', body: { code } }), t('settings.saved'));
-    if (r) { setBackupCodes(r.data.backupCodes); setMode('backup-codes'); await refresh(); }
-  };
-
-  const disable = async (e) => {
-    e.preventDefault();
-    if (await a.run(() => api('/auth/2fa/disable', { method: 'POST', body: { password } }), t('common.success'))) {
-      reset(); load(); await refresh();
-    }
-  };
-
-  if (status === null) return <p className="mut sm">{t('common.loading')}</p>;
-
-  if (mode === null) {
-    return (
-      <>
-        <p className="mut sm">{t('settings.changePasswordDesc')}</p>
-        <p className="mt">{t('settings.pinStatus')} : {status.enabled ? <Badge v="active" /> : <Badge v="pending" />}</p>
-        <div className="row mt" style={{ gap: '.5rem' }}>
-          {status.enabled ? (
-            <button className="btn danger" onClick={() => setMode('disable')}>{t('common.delete')}</button>
-          ) : (
-            <button className="btn" onClick={startSetup} disabled={a.busy}>
-              <Icons.Key size={16} /> {t('settings.twoFA')}
-            </button>
-          )}
-        </div>
-        <Msg>{a.error}</Msg>
-        <Msg kind="ok">{a.info}</Msg>
-      </>
-    );
-  }
-
-  if (mode === 'enable') {
-    return (
-      <form onSubmit={enable}>
-        <h4>1. {t('common.search')}</h4>
-        <div style={{ textAlign: 'center', margin: '1rem 0' }}>
-          <img src={setup.qrCode} alt="QR Code 2FA" style={{ maxWidth: 240, borderRadius: 12, background: '#fff', padding: 8 }} />
-        </div>
-        <code style={{ display: 'block', marginTop: '.5rem', padding: '.6rem', background: 'rgba(0,0,0,.3)', borderRadius: 8, wordBreak: 'break-all', fontSize: '.85rem' }}>
-          {setup.secret}
-        </code>
-        <h4>2. {t('auth.2faCode')}</h4>
-        <input type="text" inputMode="numeric" maxLength={6} pattern="\d{6}" required value={code}
-          onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-          placeholder="123456"
-          style={{ fontSize: '1.3rem', letterSpacing: '0.2em', textAlign: 'center', fontWeight: 700 }}
-          autoFocus />
-        <Msg>{a.error}</Msg>
-        <div className="row mt" style={{ gap: '.5rem' }}>
-          <button type="button" className="btn ghost" onClick={reset}>{t('common.cancel')}</button>
-          <button className="btn" disabled={a.busy || code.length !== 6}>{t('auth.validate')}</button>
-        </div>
-      </form>
-    );
-  }
-
-  if (mode === 'backup-codes') {
-    return (
-      <>
-        <h4>✅ 2FA</h4>
-        <Msg kind="ok">{t('common.success')}</Msg>
-        <div className="backup-codes-grid">
-          {backupCodes.map((c, i) => (
-            <code key={i} className="backup-code">{c}</code>
-          ))}
-        </div>
-        <button className="btn mt" onClick={async () => {
-          try {
-            await navigator.clipboard.writeText(backupCodes.join('\n'));
-            a.setInfo(t('common.success'));
-          } catch { /* ignore */ }
-        }}>
-          <Icons.Copy size={16} /> {t('common.save')}
-        </button>
-        <button className="btn ghost mt" onClick={() => { reset(); load(); }} style={{ width: '100%' }}>
-          {t('common.close')}
-        </button>
-      </>
-    );
-  }
-
-  return (
-    <form onSubmit={disable}>
-      <p className="mut sm">{t('settings.codePinDesc')}</p>
-      <label>{t('auth.password')}</label>
-      <input type="password" required value={password}
-        onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" />
-      <Msg>{a.error}</Msg>
-      <div className="row mt" style={{ gap: '.5rem' }}>
-        <button type="button" className="btn ghost" onClick={reset}>{t('common.cancel')}</button>
-        <button className="btn danger" disabled={a.busy}>{t('common.delete')}</button>
-      </div>
-    </form>
-  );
-}
-
-// ============================================================
 // HISTORIQUE CONNEXIONS
 // ============================================================
 function LoginHistory() {
@@ -833,9 +1029,8 @@ function LoginHistory() {
 
   const fmtUA = (ua) => {
     if (!ua) return t('settings.unknownDevice');
-    if (/mobile/i.test(ua)) return '📱 Mobile';
-    if (/tablet|ipad/i.test(ua)) return '📱 Tablet';
-    return '💻 Desktop';
+    if (/mobile|tablet|ipad/i.test(ua)) return 'Mobile';
+    return 'Desktop';
   };
 
   return (
@@ -931,91 +1126,118 @@ export function Admin() {
       )}
 
       <div className="card mt">
-        <div className="row between">
-          <h3>{t('admin.users')}</h3>
-          <div className="row" style={{ gap: '.5rem' }}>
-            <input
-              style={{ maxWidth: 240 }}
-              placeholder={t('admin.search')}
-              value={q}
-              onChange={(e) => { setQ(e.target.value); setUp(1); }}
-            />
-            <button className="btn" onClick={() => setShowCreate(true)}>
-              {t('admin.createUser')}
-            </button>
-          </div>
+  <div className="admin-toolbar">
+    <h3>{t('admin.users')}</h3>
+    <div className="admin-toolbar-actions">
+      <div className="search-wrapper">
+        <div className="search-input-wrapper">
+          <Icons.Search size={16} className="search-icon" />
+          <input
+            className="search-input"
+            placeholder={t('admin.search')}
+            value={q}
+            onChange={(e) => { setQ(e.target.value); setUp(1); }}
+          />
         </div>
-        <Msg>{a.error}</Msg>
-        <Msg kind="ok">{a.info}</Msg>
-        <div className="scroll">
-          <table>
-            <thead>
-              <tr><th>{t('admin.name')}</th><th>{t('admin.email')}</th><th>{t('admin.role')}</th><th>{t('admin.status')}</th><th /></tr>
-            </thead>
-            <tbody>
-              {users.data.map((u) => (
-                <tr key={u.id}>
-                  <td>{u.fullName}</td>
-                  <td className="mut">{u.email}</td>
-                  <td><Badge v={u.role} /></td>
-                  <td><Badge v={u.status === 'disabled' ? 'failed' : 'active'} /></td>
-                  <td className="row">
-                    {u.status !== 'deleted' && <>
-                      <button className="btn ghost sm" onClick={() => openUserTontines(u)}>{t('admin.tontines')}</button>
-                      <button className="btn ghost sm" onClick={() => patch(u.id, { status: u.status === 'active' ? 'disabled' : 'active' })}>
-                        {u.status === 'active' ? t('admin.disable') : t('admin.enable')}
-                      </button>
-                      <button className="btn ghost sm" onClick={() => patch(u.id, { role: u.role === 'admin' ? 'member' : 'admin' })}>
-                        {u.role === 'admin' ? t('admin.removeAdmin') : t('admin.makeAdmin')}
-                      </button>
-                      <button
-                        className="btn ghost sm"
-                        onClick={() => setConfirmDelete(u)}
-                        title={t('common.delete')}
-                        style={{ color: 'var(--red)' }}
-                      >
-                        <Icons.Delete size={14} />
-                      </button>
-                    </>}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <Pager meta={users.meta} onPage={setUp} />
       </div>
+      <button className="btn" onClick={() => setShowCreate(true)}>
+        <Icons.Plus size={16} />
+        {t('admin.createUser')}
+      </button>
+    </div>
+  </div>
+  <Msg>{a.error}</Msg>
+  <Msg kind="ok">{a.info}</Msg>
+  <div className="scroll">
+    <table>
+      <thead>
+        <tr>
+          <th>{t('admin.name')}</th>
+          <th>{t('admin.email')}</th>
+          <th>{t('admin.role')}</th>
+          <th>{t('admin.status')}</th>
+          <th style={{ width: 60 }}></th>
+        </tr>
+      </thead>
+      <tbody>
+        {users.data.map((u) => (
+          <tr key={u.id}>
+            <td>{u.fullName}</td>
+            <td className="mut">{u.email}</td>
+            <td><Badge v={u.role} /></td>
+            <td><Badge v={u.status === 'disabled' ? 'failed' : 'active'} /></td>
+            <td>
+              {u.status !== 'deleted' && (
+                <div className="admin-actions">
+                  <button className="admin-action-btn" onClick={() => openUserTontines(u)} title={t('admin.tontines')}>
+                    <Icons.Tontines size={16} />
+                  </button>
+                  <button
+                    className="admin-action-btn"
+                    onClick={() => patch(u.id, { status: u.status === 'active' ? 'disabled' : 'active' })}
+                    title={u.status === 'active' ? t('admin.disable') : t('admin.enable')}
+                  >
+                    {u.status === 'active' ? <Icons.EyeOff size={16} /> : <Icons.Success size={16} />}
+                  </button>
+                  <button
+                    className="admin-action-btn"
+                    onClick={() => patch(u.id, { role: u.role === 'admin' ? 'member' : 'admin' })}
+                    title={u.role === 'admin' ? t('admin.removeAdmin') : t('admin.makeAdmin')}
+                  >
+                    <Icons.Admin size={16} />
+                  </button>
+                  <button
+                    className="admin-action-btn admin-action-danger"
+                    onClick={() => setConfirmDelete(u)}
+                    title={t('common.delete')}
+                  >
+                    <Icons.Delete size={16} />
+                  </button>
+                </div>
+              )}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+  <Pager meta={users.meta} onPage={setUp} />
+</div>
 
       <div className="card mt">
-        <h3>{t('admin.auditLog')}</h3>
-        <div className="scroll">
-          <table>
-            <thead>
-              <tr>
-                <th>{t('admin.date')}</th>
-                <th>{t('admin.user')}</th>
-                <th>{t('admin.action')}</th>
-                <th>{t('admin.resource')}</th>
-                <th>{t('admin.result')}</th>
-                <th>IP</th>
-              </tr>
-            </thead>
-            <tbody>
-              {logs.data.map((l) => (
-                <tr key={l.id}>
-                  <td>{fdatetime(l.createdAt)}</td>
-                  <td>{l.userId ?? '—'}</td>
-                  <td>{l.action}</td>
-                  <td>{l.resourceType ? `${l.resourceType} #${l.resourceId ?? ''}` : '—'}</td>
-                  <td><Badge v={l.result === 'success' ? 'validated' : 'failed'} /></td>
-                  <td className="mut">{l.ip}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <Pager meta={logs.meta} onPage={setLp} />
-      </div>
+  <div className="admin-toolbar">
+    <h3 style={{ display: 'flex', alignItems: 'center', gap: '.5rem' }}>
+      <Icons.File size={18} /> {t('admin.auditLog')}
+    </h3>
+  </div>
+  <div className="scroll">
+    <table>
+      <thead>
+        <tr>
+          <th>{t('admin.date')}</th>
+          <th>{t('admin.user')}</th>
+          <th>{t('admin.action')}</th>
+          <th>{t('admin.resource')}</th>
+          <th>{t('admin.result')}</th>
+          <th>IP</th>
+        </tr>
+      </thead>
+      <tbody>
+        {logs.data.map((l) => (
+          <tr key={l.id}>
+            <td>{fdatetime(l.createdAt)}</td>
+            <td>{l.userId ?? '—'}</td>
+            <td>{l.action}</td>
+            <td>{l.resourceType ? `${l.resourceType} #${l.resourceId ?? ''}` : '—'}</td>
+            <td><Badge v={l.result === 'success' ? 'validated' : 'failed'} /></td>
+            <td className="mut">{l.ip}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+  <Pager meta={logs.meta} onPage={setLp} />
+</div>
 
       {showCreate && (
         <CreateUserModal

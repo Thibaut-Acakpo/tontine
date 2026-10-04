@@ -226,3 +226,34 @@ export function ConfirmModal({
     </div>
   );
 }
+
+// ============================================================
+// MODAL GÉNÉRIQUE (nouveau)
+// ============================================================
+
+export function Modal({ open, title, onClose, children, width = 480 }) {
+  useEffect(() => {
+    if (!open) return undefined;
+    const onKey = (e) => { if (e.key === 'Escape') onClose?.(); };
+    addEventListener('keydown', onKey);
+    document.body.style.overflow = 'hidden';
+    return () => {
+      removeEventListener('keydown', onKey);
+      document.body.style.overflow = '';
+    };
+  }, [open, onClose]);
+
+  if (!open) return null;
+
+  return (
+    <div className="modal-backdrop" onClick={onClose} role="dialog" aria-modal="true">
+      <div className="modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: width }}>
+        <div className="modal-header">
+          <h3>{title}</h3>
+          <button className="modal-close" onClick={onClose} aria-label="Fermer">✕</button>
+        </div>
+        <div className="modal-body">{children}</div>
+      </div>
+    </div>
+  );
+}
