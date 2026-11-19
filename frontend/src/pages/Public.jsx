@@ -3,7 +3,7 @@ import { Link, useNavigate, useSearchParams, useLocation } from 'react-router-do
 import { useTranslation } from 'react-i18next';
 import { api } from '../api.js';
 import { useAuth } from '../auth.jsx';
-import { Coin3D, Reveal, Tilt } from '../components/Fx.jsx';
+import { Reveal } from '../components/Fx.jsx';
 import { Msg, useAction } from '../components/ui.jsx';
 import { Icons } from '../components/Icons.jsx';
 import { useTheme } from '../components/ThemeProvider.jsx';
@@ -17,6 +17,7 @@ export function PublicNav() {
   const location = useLocation();
   const { theme, toggle: toggleTheme } = useTheme();
   const isAuthFlow = ['/pin', '/2fa'].includes(location.pathname);
+  const isLogin = location.pathname === '/connexion';
 
   const changeLanguage = (lang) => {
     i18n.changeLanguage(lang);
@@ -53,210 +54,12 @@ export function PublicNav() {
           <Link className="btn" to="/app">{t('auth.mySpace')}</Link>
         )}
         {!user && (
-          <Link className="btn" to="/connexion">{t('auth.login')}</Link>
+          <Link className="btn" to={isLogin ? '/' : '/connexion'}>
+            {isLogin ? t('common.back') : t('auth.login')}
+          </Link>
         )}
       </div>
     </nav>
-  );
-}
-
-// ============================================================
-// PAGE D'ACCUEIL
-// ============================================================
-export function Home() {
-  const { t } = useTranslation();
-  return (
-    <div className="pub">
-      <PublicNav />
-
-      {/* 1. HERO */}
-      <section className="hero">
-        <div>
-          <h1>
-            {t('home.heroTitle')}<br />
-            <span className="gold">{t('home.heroHighlight')}</span> {t('home.heroEnd')}
-          </h1>
-          <p>{t('home.heroDesc')}</p>
-          <div className="row mt" style={{ gap: '.6rem' }}>
-            <Link className="btn cta-btn" to="/connexion">{t('home.accessSpace')}</Link>
-            <a className="btn ghost" href="#how-it-works">{t('home.howItWorks')}</a>
-            <a className="btn ghost" href="#contact">{t('contact.button')}</a>
-          </div>
-        </div>
-        <Coin3D />
-      </section>
-
-      {/* 2. CHIFFRES CLÉS */}
-      <section className="landing-stats">
-        {[
-          ['100%', t('home.stat1.label'), t('home.stat1.desc')],
-          ['0', t('home.stat2.label'), t('home.stat2.desc')],
-          ['24/7', t('home.stat3.label'), t('home.stat3.desc')],
-          ['∞', t('home.stat4.label'), t('home.stat4.desc')],
-        ].map(([v, l, d], i) => (
-          <Reveal key={l} delay={i * 80}>
-            <div className="landing-stat">
-              <b>{v}</b>
-              <span>{l}</span>
-              <small className="mut">{d}</small>
-            </div>
-          </Reveal>
-        ))}
-      </section>
-
-      {/* 3. FONCTIONNALITÉS */}
-      <section className="landing-section">
-        <div className="landing-head">
-          <h2>{t('home.featuresTitle')}</h2>
-          <p className="mut">{t('home.featuresDesc')}</p>
-        </div>
-        <div className="features">
-          {[
-            { Icon: Icons.Trending,      title: t('home.feat1.title'), desc: t('home.feat1.desc') },
-            { Icon: Icons.Lock,          title: t('home.feat2.title'), desc: t('home.feat2.desc') },
-            { Icon: Icons.Payments,      title: t('home.feat3.title'), desc: t('home.feat3.desc') },
-            { Icon: Icons.Users,         title: t('home.feat4.title'), desc: t('home.feat4.desc') },
-            { Icon: Icons.Notifications, title: t('home.feat5.title'), desc: t('home.feat5.desc') },
-            { Icon: Icons.Phone,         title: t('home.feat6.title'), desc: t('home.feat6.desc') },
-          ].map(({ Icon, title, desc }, i) => (
-            <Reveal key={title} delay={i * 60}>
-              <Tilt>
-                <div className="feature-icon">
-                  <Icon size={26} strokeWidth={1.8} />
-                </div>
-                <h3>{title}</h3>
-                <p className="mut">{desc}</p>
-              </Tilt>
-            </Reveal>
-          ))}
-        </div>
-      </section>
-
-      {/* 4. COMMENT ÇA MARCHE */}
-      <section className="landing-section" id="how-it-works">
-        <div className="landing-head">
-          <h2>{t('home.howTitle')}</h2>
-          <p className="mut">{t('home.howDesc')}</p>
-        </div>
-        <div className="steps-grid">
-          {[
-            { n: '1', title: t('home.step1.title'), desc: t('home.step1.desc') },
-            { n: '2', title: t('home.step2.title'), desc: t('home.step2.desc') },
-            { n: '3', title: t('home.step3.title'), desc: t('home.step3.desc') },
-            { n: '4', title: t('home.step4.title'), desc: t('home.step4.desc') },
-          ].map(({ n, title, desc }, i) => (
-            <Reveal key={n} delay={i * 80}>
-              <div className="step-card">
-                <div className="step-number">{n}</div>
-                <h3>{title}</h3>
-                <p className="mut">{desc}</p>
-              </div>
-            </Reveal>
-          ))}
-        </div>
-      </section>
-
-      {/* 5. CTA FINAL */}
-      <section className="landing-cta">
-        <Reveal>
-          <div className="cta-card">
-            <h2>{t('home.ctaTitle')}</h2>
-            <p className="mut">{t('home.ctaDesc')}</p>
-            <div className="row" style={{ justifyContent: 'center', gap: '.6rem', marginTop: '1.5rem' }}>
-              <Link className="btn cta-btn" to="/connexion">{t('home.accessSpace')}</Link>
-            </div>
-          </div>
-        </Reveal>
-      </section>
-
-      {/* 5b. CONTACT */}
-      <section className="landing-section contact-section" id="contact">
-        <div className="landing-head">
-          <h2>{t('contact.title')}</h2>
-          <p className="mut">{t('contact.desc')}</p>
-        </div>
-
-        <Reveal>
-          <div className="contact-grid">
-            {/* Case 1 : Email */}
-            <a className="contact-card" href="mailto:acakpothibaut2@gmail.com">
-              <div className="contact-icon">
-                <Icons.Mail size={32} strokeWidth={1.8} />
-              </div>
-              <div className="contact-label">{t('contact.email')}</div>
-              <div className="contact-value">acakpothibaut2@gmail.com</div>
-            </a>
-
-            {/* Case 2 : WhatsApp + Appel */}
-            <div className="contact-card contact-card-phone">
-              <div className="contact-icon">
-                <Icons.PhoneCall size={32} strokeWidth={1.8} />
-              </div>
-              <div className="contact-label">
-                {t('contact.whatsapp')} &amp; {t('contact.call')}
-              </div>
-              <div className="contact-value">+229 01 99 91 14 38</div>
-
-              <div className="contact-actions">
-                <a
-                  className="contact-action-btn wa"
-                  href="https://wa.me/2290199911438?text=Bonjour%2C%20je%20souhaite%20g%C3%A9rer%20mes%20tontines%20avec%20Tontine."
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <Icons.WhatsApp size={16} strokeWidth={2} />
-                  WhatsApp
-                </a>
-                <a className="contact-action-btn call" href="tel:+2290199911438">
-                  <Icons.PhoneCall size={16} strokeWidth={2} />
-                  {t('contact.call')}
-                </a>
-              </div>
-            </div>
-          </div>
-
-          <p className="mut sm" style={{ textAlign: 'center', marginTop: '1.5rem' }}>
-            ⏱️ {t('contact.responseTime')}
-          </p>
-        </Reveal>
-      </section>
-
-      {/* 6. FOOTER */}
-      <footer className="landing-footer">
-        <div className="footer-grid">
-          <div>
-            <div className="brand" style={{ marginBottom: '.8rem' }}><i>₣</i> Tontine</div>
-            <p className="mut sm" style={{ maxWidth: 320 }}>{t('home.footerTagline')}</p>
-          </div>
-          <div>
-            <h4>{t('home.footerNav')}</h4>
-            <ul>
-              <li><a href="#how-it-works">{t('home.howItWorks')}</a></li>
-              <li><a href="#contact">{t('contact.button')}</a></li>
-              <li><Link to="/connexion">{t('auth.login')}</Link></li>
-            </ul>
-          </div>
-          <div>
-            <h4>{t('home.footerLegal')}</h4>
-            <ul>
-              <li><Link to="/confidentialite">{t('home.footerPrivacy')}</Link></li>
-              <li><Link to="/cgu">{t('home.footerTerms')}</Link></li>
-            </ul>
-          </div>
-          <div>
-            <h4>{t('home.footerContact')}</h4>
-            <ul>
-              <li><a href="mailto:acakpothibaut2@gmail.com">acakpothibaut2@gmail.com</a></li>
-              <li><a href="https://wa.me/2290199911438" target="_blank" rel="noopener noreferrer">WhatsApp</a></li>
-              <li><a href="tel:+2290199911438">+229 01 99 91 14 38</a></li>
-            </ul>
-          </div>
-        </div>
-        <div className="footer-bottom">
-          <span className="mut sm">© {new Date().getFullYear()} Tontine · {t('home.footerRights')}</span>
-        </div>
-      </footer>
-    </div>
   );
 }
 
@@ -268,6 +71,7 @@ const Shell = ({ title, children }) => (
     <PublicNav />
     <Reveal>
       <div className="card auth">
+        <div className="auth-mark" aria-hidden="true">₣</div>
         <h2>{title}</h2>
         {children}
       </div>
@@ -373,7 +177,7 @@ export function Login() {
         <Msg>{a.error}</Msg>
         <button className="btn mt" disabled={a.busy}>{a.busy ? '…' : t('auth.loginBtn')}</button>
       </form>
-      <p className="mut sm mt"><Link to="/mot-de-passe-oublie">{t('auth.forgotPassword')}</Link></p>
+      <p className="mut sm mt auth-forgot-link"><Link to="/mot-de-passe-oublie">{t('auth.forgotPassword')}</Link></p>
     </Shell>
   );
 }

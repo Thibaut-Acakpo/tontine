@@ -91,6 +91,15 @@ export default function Layout() {
           <span>Tontine</span>
         </div>
         <div className="topbar-actions">
+          <select
+            className="topbar-lang"
+            value={i18n.language?.split('-')[0] || 'fr'}
+            onChange={(e) => changeLanguage(e.target.value)}
+            aria-label="Changer de langue"
+          >
+            <option value="fr">FR</option>
+            <option value="en">EN</option>
+          </select>
           <button
             className="theme-toggle"
             onClick={toggleTheme}

@@ -574,3 +574,13 @@ Merci aux projets et technologies utilisés pour construire cette plateforme :
 Fait avec ❤️ pour digitaliser la gestion des tontines.
 
 </div>
+
+---
+
+## 🖼️ Landing page
+
+La page d'accueil (`/`) est dans `frontend/src/pages/Landing.jsx`, avec ses styles dans `frontend/src/landing/landing.css` (préfixe `lp-`) et ses textes FR/EN dans `frontend/src/landing/copy.js`.
+
+* Aucun témoignage ni chiffre inventé : ajoutez de vrais retours dans `TESTIMONIALS` (`copy.js`), la section s'adapte.
+* Le formulaire de contact ne stocke rien : il ouvre WhatsApp avec le message prérempli (numéro et email dans `CONTACT`).
+* Le tarif est affiché « Sur demande » : modifiez `lp.offer.price` dans `copy.js` quand il sera défini.

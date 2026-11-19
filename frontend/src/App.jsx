@@ -3,7 +3,8 @@ import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { useAuth } from './auth.jsx';
 import { setCsrf } from './api.js';
 import Layout from './components/Layout.jsx';
-import { Home, Login, Register, Forgot, Reset, VerifyEmail, VerifyPin, Verify2FA } from './pages/Public.jsx';
+import Landing from './pages/Landing.jsx';
+import { Login, Register, Forgot, Reset, VerifyEmail, VerifyPin, Verify2FA } from './pages/Public.jsx';
 import { Privacy, Terms } from './pages/Legal.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import Tontines from './pages/Tontines.jsx';
@@ -31,7 +32,7 @@ export default function App() {
 
   return (
     <Routes>
-      <Route path="/" element={<Home />} />
+      <Route path="/" element={<Landing />} />
       <Route path="/inscription" element={<Register />} />
       <Route path="/connexion" element={<Login />} />
       <Route path="/mot-de-passe-oublie" element={<Forgot />} />

@@ -1,9 +1,11 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
+import { landingFr, landingEn } from './landing/copy.js';
 
 const resources = {
   fr: {
     translation: {
+      ...landingFr,
       // ============================================================
       // MENU
       // ============================================================
@@ -492,6 +494,7 @@ const resources = {
 
   en: {
     translation: {
+      ...landingEn,
       // MENU
       'menu.dashboard': 'Dashboard',
       'menu.tontines': 'My tontines',

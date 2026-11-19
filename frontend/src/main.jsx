@@ -1,6 +1,6 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter, useLocation } from 'react-router-dom';
 import App from './App.jsx';
 import { AuthProvider } from './auth.jsx';
 import { ThemeProvider } from './components/ThemeProvider.jsx';
@@ -10,11 +10,16 @@ import { InstallPrompt } from './components/InstallPrompt.jsx';
 import './i18n.js';
 import './styles.css';
 
+function LandingEffects() {
+  const { pathname } = useLocation();
+  return pathname === '/' ? <><CoinField /><CursorGlow /></> : null;
+}
+
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <div className="boot" aria-hidden="true"><div>TONTINE · CHARGEMENT…</div></div>
-    <CoinField /><CursorGlow />
     <BrowserRouter>
+      <LandingEffects />
       <ThemeProvider>
         <AuthProvider>
           <App />
