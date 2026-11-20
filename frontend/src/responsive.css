@@ -1,0 +1,176 @@
+/* ============================================================
+   RESPONSIVE — correctifs globaux (chargé en dernier)
+   Cible : téléphones (320–480), grands mobiles / petites tablettes (481–860), tablettes (861–1100).
+   Principes : rien ne déborde, tout est centré et lisible au pouce, zones tactiles >= 44px.
+   ============================================================ */
+
+/* ---------- Sécurité globale ---------- */
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+body { overflow-x: clip; }
+img, video, canvas, iframe { max-width: 100%; }
+.main, .pub, .card, .grid > *, .row > * { min-width: 0; }
+.card, .modal, .main { overflow-wrap: anywhere; }
+.main h1, .main h2, .main h3 { overflow-wrap: anywhere; }
+
+/* ---------- Cartes de statistiques : même hauteur, alignées ---------- */
+.g4 > *, .grid.g2 > *, .grid.g3 > * { min-width: 0; }
+.g4 > div:not(.stat):not(.card) { display: flex; }
+.g4 > div:not(.stat):not(.card) > * { flex: 1 1 auto; width: 100%; }
+.stat { height: 100%; }
+
+/* ============================================================
+   ≤ 1100px — tablettes
+   ============================================================ */
+@media (max-width: 1100px) {
+  .main { padding-inline: clamp(1rem, 2.5vw, 2rem); }
+}
+
+/* ============================================================
+   ≤ 860px — le menu latéral devient un tiroir
+   ============================================================ */
+@media (max-width: 860px) {
+  .topbar { padding-top: calc(.8rem + env(safe-area-inset-top, 0px)); }
+  .topbar-brand { min-width: 0; }
+  .main { padding-bottom: calc(3rem + env(safe-area-inset-bottom, 0px)); }
+
+  /* Tiroir : pleine hauteur, jamais plus large que l'écran */
+  .side { max-width: min(86vw, 320px); overflow-y: auto; overscroll-behavior: contain; padding-bottom: calc(1.4rem + env(safe-area-inset-bottom, 0px)); }
+
+  /* Champs à 16px : évite le zoom automatique d'iOS */
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), textarea, .main select { font-size: 16px; }
+
+  /* Zones tactiles */
+  .btn, .tabs button, .nav, .theme-toggle, .topbar-toggle { min-height: 44px; }
+  .btn.sm { min-height: 40px; }
+
+  /* Tableaux : la zone de défilement ne coupe plus le contenu */
+  .scroll { max-width: 100%; }
+}
+
+/* ============================================================
+   ≤ 720px — tableaux en cartes
+   (les libellés de colonnes sont copiés dans data-label par responsive.js)
+   ============================================================ */
+@media (max-width: 720px) {
+  .shell .scroll { overflow: visible; }
+  .shell table, .shell .scroll table { display: block; width: 100%; min-width: 0 !important; border: 0; }
+  .shell thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .shell tbody { display: block; }
+  .shell tbody tr, .shell tr {
+    display: block; margin: 0 0 .75rem; padding: .55rem .95rem;
+    border: 1px solid var(--line); border-radius: 14px; background: var(--card);
+  }
+  .shell tbody tr:last-child { margin-bottom: 0; }
+  .shell tbody tr:hover { background: var(--card); }
+  .shell td, .shell td.row {
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+    padding: .5rem 0; border: 0; border-bottom: 1px dashed var(--line);
+    text-align: right; font-size: .93rem; min-width: 0;
+  }
+  .shell td:last-child { border-bottom: 0; }
+  .shell td::before {
+    content: attr(data-label); flex: 0 1 42%; max-width: 42%;
+    text-align: left; color: var(--mut);
+    font-size: .72rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+  }
+  .shell td[data-label=""]::before, .shell td:not([data-label])::before { display: none; }
+  .shell td > * { min-width: 0; max-width: 100%; }
+
+  /* Cellules d'actions (boutons) : alignées sur toute la largeur */
+  .shell td.row, .shell td:has(> .btn:only-child), .shell td:has(> .row) { flex-wrap: wrap; justify-content: flex-end; }
+  .shell td[data-label=""]:has(.btn) { justify-content: stretch; padding-top: .7rem; }
+  .shell td[data-label=""]:has(.btn) > .btn, .shell td[data-label=""]:has(.btn) select { flex: 1 1 auto; margin: 0; }
+
+  /* Ligne « aucune donnée » : centrée, sans libellé */
+  .shell td[colspan] { display: block; text-align: center; }
+  .shell td[colspan]::before { display: none; }
+}
+
+/* ============================================================
+   ≤ 640px — grands mobiles
+   ============================================================ */
+@media (max-width: 640px) {
+  /* Onglets : une seule ligne, défilement horizontal doux */
+  .tabs {
+    flex-wrap: nowrap; gap: .2rem;
+    overflow-x: auto; -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x proximity;
+    margin-inline: 0; padding-inline: 0;
+    mask-image: linear-gradient(90deg, transparent 0, #000 .9rem, #000 calc(100% - 1.4rem), transparent 100%);
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 .9rem, #000 calc(100% - 1.4rem), transparent 100%);
+  }
+  .tabs button { flex: 0 0 auto; scroll-snap-align: center; padding-inline: .95rem; }
+
+  /* En-têtes de page et barres d'outils */
+  .page-header, .row.between { gap: .7rem; }
+  .row.between > .btn:not(.sm), .page-header > .btn { width: 100%; }
+  .row.between > .btn.sm, .row > .btn:has(> svg:only-child) { width: auto; flex: none; }
+  .row > input, .row > select, .row > .search { flex: 1 1 100%; width: 100%; }
+
+  /* Profil : avatar, nom et badges centrés */
+  .profile-header { align-items: center; text-align: center; }
+  .profile-header .row, .profile-header .badges { justify-content: center; }
+  .profile-header > div { display: flex; flex-direction: column; align-items: center; }
+
+  /* Actions rapides empilées sur toute la largeur */
+  .quick-actions, .profile-actions { flex-direction: column; align-items: stretch; }
+  .quick-actions > .btn, .profile-actions > .btn { width: 100%; justify-content: center; }
+
+  /* Modales : jamais plus larges que l'écran, défilables */
+  .modal-backdrop { padding: .75rem; align-items: center; }
+  .modal { max-height: calc(100dvh - 1.5rem); overflow-y: auto; padding: 1.2rem 1.1rem; }
+  .modal .row, .modal-actions { flex-direction: column-reverse; align-items: stretch; }
+  .modal .row > .btn, .modal-actions > .btn { width: 100%; }
+
+  /* Graphiques : hauteur raisonnable */
+
+  /* Pagination centrée */
+  .pager { flex-wrap: wrap; justify-content: center; }
+}
+
+/* ============================================================
+   ≤ 600px — navigation publique et pages d'authentification
+   ============================================================ */
+@media (max-width: 600px) {
+  .pub { padding-inline: 1rem; }
+  .pubnav { flex-wrap: nowrap; justify-content: space-between; gap: .5rem; padding-bottom: 1.2rem; }
+  .pubnav .brand { font-size: 1.05rem; white-space: nowrap; }
+  .pubnav > .row { flex-wrap: nowrap; gap: .4rem !important; justify-content: flex-end; }
+  .pubnav .btn { padding: .55rem .85rem; font-size: .85rem; white-space: nowrap; }
+  .pubnav .lang-select { padding: .45rem 1.5rem .45rem .55rem; }
+
+  /* Carte d'authentification centrée verticalement et horizontalement */
+  .pub:has(.auth) { display: flex; flex-direction: column; min-height: 100dvh; }
+  .pub:has(.auth) > :not(.pubnav) { margin-block: auto; width: 100%; }
+  .auth { width: 100%; margin: 0 auto; }
+  .auth .btn { width: 100%; min-width: 0; }
+  .auth form { text-align: left; }
+}
+
+@media (max-width: 420px) {
+  /* Barre publique compacte : seul le logo reste, le nom disparaît pour tout faire tenir */
+  .pubnav .brand { font-size: 0; gap: 0; flex: none; }
+  .pubnav .brand i { font-size: 1.1rem; }
+  .pubnav .lang-select { background-image: none; padding: .45rem .6rem; }
+  .pubnav .theme-toggle-public, .pubnav .lang-select, .pubnav .btn { flex: none; }
+  .pubnav .btn { padding: .5rem .75rem; }
+}
+
+@media (max-width: 360px) {
+  .pubnav .btn { padding: .5rem .7rem; }
+  .topbar { padding-inline: .8rem; }
+  .main { padding-inline: .75rem; }
+  .card { padding: .9rem; }
+  .g4 { gap: .6rem; }
+  .stat b { font-size: 1.15rem; }
+}
+
+/* Appareils tactiles : survols neutralisés pour éviter les états « collés » */
+@media (hover: none) {
+  .card:hover, .stat:hover { transform: none; }
+}
+
+/* Écrans larges : contenu centré et lisible */
+@media (min-width: 1500px) {
+  .main { margin-inline: auto; }
+}
